@@ -1,0 +1,35 @@
+#RewriteEngine On 
+#
+#RewriteBase /
+##RewriteBase /~user4/php7/rest/server/api/
+#RewriteCond %{REQUEST_FILENAME} !-f 
+##RewriteCond %{REQUEST_FILENAME} !-d 
+#RewriteRule ^.*$ index.php 
+#DirectorySlash Off
+
+
+RewriteEngine On
+ 
+RewriteCond %{REQUEST_FILENAME} !-d
+RewriteCond %{REQUEST_FILENAME} !-s
+RewriteRule ^(.*)$ index.php?rquest=$1 [QSA,NC,L]
+
+RewriteCond %{REQUEST_FILENAME} -d
+RewriteRule ^(.*)$ index.php [QSA,NC,L]
+
+RewriteCond %{REQUEST_FILENAME} -s
+RewriteRule ^(.*)$ index.php [QSA,NC,L]
+
+RewriteEngine On
+RewriteRule .* index.php [QSA,E=HTTP_AUTHORIZATION:%{HTTP:Authorization}]  
+
+<Limit GET POST>
+  order deny,allow
+  deny from all
+  allow from all
+  </Limit>
+  <Limit PUT DELETE>
+  order deny,allow
+  deny from all
+  allow from all
+  </Limit>
