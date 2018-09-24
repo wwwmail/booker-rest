@@ -105,4 +105,12 @@ class Filter {
         }
     }
 
+    public function filter_hour($value, $rule_value, $item)
+    {
+        $hour = date("H", strtotime($value));
+        if (    $hour < 8 || $hour > 20 ) {
+            $this->add_error("{$item} can't be less then 8 AM and more then 8 PM");
+        }
+    }
+
 }

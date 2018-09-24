@@ -203,15 +203,15 @@ class EventsService {
                     'recursion' => ['zirrow_one' => true],
                     'description' => ['required' => true],
                     'date' => ['required' => true, 'date' => date('Y-m-d')],
-                    'starttime' => ['required' => true, 'date' => date("Y-m-d G:i")],
-                    'endtime' => ['required' => true, 'date' => $data['starttime']],
+                    'starttime' => ['required' => true, 'date' => date("Y-m-d G:i"), 'hour'=> true],
+                    'endtime' => ['required' => true, 'date' => $data['starttime'], 'hour'=> true],
                     'recursion_type' => [$data['recursion'] ? 'required' : '' => true],
         ));
         
         
-        $a = $this->checkAvaliableDate($data['starttime'], $data['endtime']);
+//        $a = $this->checkAvaliableDate($data['starttime'], $data['endtime']);
         
-        var_dump($a); die;
+//        var_dump($a); die;
         
 
         if ($filter->passed()) {

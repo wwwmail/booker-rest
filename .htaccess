@@ -1,30 +1,17 @@
-#RewriteEngine On 
-#
-#RewriteBase /
-##RewriteBase /~user4/php7/rest/server/api/
-#RewriteCond %{REQUEST_FILENAME} !-f 
-##RewriteCond %{REQUEST_FILENAME} !-d 
-#RewriteRule ^.*$ index.php 
-#DirectorySlash Off
-
-
 RewriteEngine On
- 
+
+RewriteRule .* index.php [QSA,E=HTTP_AUTHORIZATION:%{HTTP:Authorization}]
+
+RewriteBase /~user4/php7/booker/
+RewriteCond %{REQUEST_FILENAME} !-f
 RewriteCond %{REQUEST_FILENAME} !-d
-RewriteCond %{REQUEST_FILENAME} !-s
-RewriteRule ^(.*)$ index.php?rquest=$1 [QSA,NC,L]
-#start geek
-RewriteBase /~user4/php7/booker/ 
-#end geek
-RewriteCond %{REQUEST_FILENAME} -d
-RewriteRule ^(.*)$ index.php [QSA,NC,L]
+RewriteRule ^.*$ index.php
 
-RewriteCond %{REQUEST_FILENAME} -s
-RewriteRule ^(.*)$ index.php [QSA,NC,L]
 
-RewriteEngine On
-RewriteRule .* index.php [QSA,E=HTTP_AUTHORIZATION:%{HTTP:Authorization}]  
+ #RewriteCond %{HTTP:Authorization} ^(.*)
+ #RewriteRule .* - [e=HTTP_AUTHORIZATION:%1]
 
+ DirectorySlash Off
 <Limit GET POST>
   order deny,allow
   deny from all

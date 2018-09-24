@@ -35,7 +35,10 @@ class AppHelper {
     {
         //var_dump($_SERVER); die;
         $headers = null;
-        if (isset($_SERVER['Authorization'])) {
+         if(isset($_SERVER['REDIRECT_HTTP_AUTHORIZATION'])){
+                 $headers = trim($_SERVER['REDIRECT_HTTP_AUTHORIZATION']);
+         }
+        else if (isset($_SERVER['Authorization'])) {
             $headers = trim($_SERVER["Authorization"]);
         } else if (isset($_SERVER['HTTP_AUTHORIZATION'])) { //Nginx or fast CGI
             $headers = trim($_SERVER["HTTP_AUTHORIZATION"]);
