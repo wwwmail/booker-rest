@@ -9,7 +9,7 @@ use PDO;
 class EventsService {
 
     protected $connection;
-
+    private $firstInsertId;
     public function __construct(Connection $connection)
     {
         $this->connection = $connection;
@@ -38,6 +38,7 @@ class EventsService {
 
     public function creatSimpleEvent(array $data)
     {
+        
         $sql = 'INSERT INTO app_events SET recursion = :recursion, '
                 . 'recursion_id = :recursion_id, user_id = :user_id,'
                 . 'room_id = :room_id, description = :description,'
@@ -86,14 +87,19 @@ class EventsService {
                     . 'date = :date, starttime = :starttime,'
                     . 'endtime = :endtime';
             $stmt = $this->connection->pdo->prepare($sql);
-
-            //$this->connection->pdo->beginTransaction();
+            
+            //$firstInsertId = '';
+            $this->connection->pdo->beginTransaction();
             for ($i = 0; $i < 4; $i++) {
+               // $this->connection->pdo->beginTransaction();
                 $date = 7 * $i;
-
-                //$this->connection->pdo->beginTransaction();
+                if($i == 1){
+                    $this->firstInsertId = $this->connection->pdo->lastInsertId();
+                }
+                
+                //
                 $stmt->execute(['recursion' => $data['recursion'],
-                    'recursion_id' => $data['recursion_id'],
+                    'recursion_id' => $this->firstInsertId,
                     'user_id' => $data['user_id'],
                     'room_id' => $data['room_id'],
                     'description' => $data['description'],
@@ -102,7 +108,7 @@ class EventsService {
                     'endtime' => date('Y-m-d H:i:s', strtotime($data['endtime'] . " +{$date} days")),
                 ]);
             }
-            //$this->connection->pdo->commit();
+            $this->connection->pdo->commit();
             $success = true;
         } catch (PDOException $e) {
             $this->connection->pdo->rollBack();
@@ -125,11 +131,14 @@ class EventsService {
 
             $this->connection->pdo->beginTransaction();
             for ($i = 0; $i < 2; $i++) {
+                if($i == 1){
+                    $this->firstInsertId = $this->connection->pdo->lastInsertId();
+                }
                 $date = 14 * $i;
 
                 $this->connection->pdo->beginTransaction();
                 $stmt->execute(['recursion' => $data['recursion'],
-                    'recursion_id' => $data['recursion_id'],
+                    'recursion_id' => $this->firstInsertId,
                     'user_id' => $data['user_id'],
                     'room_id' => $data['room_id'],
                     'description' => $data['description'],
@@ -161,10 +170,13 @@ class EventsService {
 
             $this->connection->pdo->beginTransaction();
             for ($i = 1; $i < 13; $i++) {
-                
+                if($i == 2){
+                    $this->firstInsertId = $this->connection->pdo->lastInsertId();
+                }
+              
                 $this->connection->pdo->beginTransaction();
                 $stmt->execute(['recursion' => $data['recursion'],
-                    'recursion_id' => $data['recursion_id'],
+                    'recursion_id' => $this->firstInsertId,
                     'user_id' => $data['user_id'],
                     'room_id' => $data['room_id'],
                     'description' => $data['description'],
@@ -197,6 +209,10 @@ class EventsService {
         ));
         
         
+        $a = $this->checkAvaliableDate($data['starttime'], $data['endtime']);
+        
+        var_dump($a); die;
+        
 
         if ($filter->passed()) {
 
@@ -209,6 +225,17 @@ class EventsService {
     
     public function checkAvaliableDate($starttime, $endtime)
     {
+        $starttime = date('Y-m-d H:i:s', strtotime($starttime.' +1 minutes'));
+        $endtime = date('Y-m-d H:i:s', strtotime($endtime.' +1 minutes'));
+                      
+        $sql = "SELECT * FROM app_events WHERE ('$starttime' BETWEEN `starttime` AND `endtime` "
+                . "OR '$endtime' BETWEEN `starttime` AND `endtime` "
+                . "OR `starttime` BETWEEN '$starttime' AND '$endtime'"
+                . "OR `endtime` BETWEEN '$starttime' AND '$endtime')"; 
+        $stmt = $this->connection->pdo->prepare($sql);
+        
+        $stmt->execute();
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
         
     }
 
