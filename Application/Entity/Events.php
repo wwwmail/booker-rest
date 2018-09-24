@@ -7,24 +7,38 @@ class Events extends Base {
     const TABLE_NAME = 'app_events';
 
     public $id = '';
+    public $recursion='';
     public $recursion_id = '';
     public $user_id = '';
     public $room_id = '';
     public $description = '';
+    public $date = '';
     public $starttime = '';
     public $endtime = '';
     public $created = '';
     protected $mapping = [
         'id' => 'id',
+        'recursion' => 'recursion',
         'recursion_id' => 'recursionId',
         'user_id' => 'userId',
         'room_id' => 'roomId',
         'description' => 'description',
+        'date' => 'date',
         'starttime' => 'starttime',
         'endtime' => 'endtime',
         'created' => 'created',
     ];
+    
+    public function getRecursion()
+    {
+        return $this->recursion;
+    }
 
+    public function setRecursion($id)
+    {
+        $this->recursion = $id;
+    }
+    
     public function getRecursionId()
     {
         return $this->recursion_id;
@@ -64,6 +78,17 @@ class Events extends Base {
     {
 
         $this->description = $description;
+    }
+    
+    public function getDate()
+    {
+        return $this->date;
+    }
+
+    public function setDate($date)
+    {
+
+        $this->date = $date;
     }
 
     public function getStarttime()

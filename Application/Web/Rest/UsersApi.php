@@ -60,13 +60,23 @@ class UsersApi extends AbstractApi {
     {
         $data = json_decode(file_get_contents('php://input'), true);
 
-        $cust = Users::arrayToEntity($data['data'], new Users());
-        if ($newCust = $this->service->save($cust)) {
-            $response->setData(['success' => self::SUCCESS_UPDATE]);
+        $user = $this->service->fetchById($data['data']['id']);
+        //var_dump($data); die;
+        $obj = Users::arrayToEntity($data['data'], new Users());
+        if(isset($data['data']['password']) && !empty($data['data']['password'])){
+            $hash = $this->service->createHashPassword($data['data']['password']);
+        
+            $obj->setPassword($hash);
+        }else{
+            $obj->setPassword($user->getPassword());
+        }
+        if ($newCust = $this->service->save($obj)) {
+            $response->setData(['success' => self::_TRUE,
+                                'message' => 'success updated']);
             $response->setStatus(Request::STATUS_200);
         } else {
             $response->setData([self::ERROR]);
-            $response->setStatus(Request::STATUS_500);
+            $response->setStatus(Request::STATUS_200);
         }
     }
 
@@ -74,51 +84,33 @@ class UsersApi extends AbstractApi {
     {
         $id = $request->getDataByKey(self::ID_FIELD) ?? 0;
         $reqData = $request->getData();
+                
+        $newUser = $this->service->createUser($reqData); 
+        
+       
 
-        if ($this->service->fetchByEmail($reqData['email'])) {
-
-            $response->setData(['success' => self::_FALSE,
-                'message' => 'user_exist']);
-            $response->setStatus(Request::STATUS_200);
-
-            return;
-        }
-
-        $random = openssl_random_pseudo_bytes(18);
-
-        $salt = sprintf('$2y$%02d$%s', 13, // 2^n cost factor
-                substr(strtr(base64_encode($random), '+', '.'), 0, 22)
-        );
-
-        $options = ['cost' => 13,
-            'salt' => $salt];
-
-        $hash = password_hash($reqData['password'], PASSWORD_BCRYPT, $options);
-
-        $data['token'] = bin2hex(random_bytes(16));
-        $data['password'] = $hash;
-        $updateData = array_merge($reqData, $data);
-
-        $updateCust = Users::arrayToEntity($updateData, new Users());
-
-        //var_dump($updateCust);die;
-        if ($this->service->save($updateCust)) {
+        if ($newUser['success'] && $this->service->save($newUser['item'])) {
             $response->setData(['success' => self::_TRUE,
                 'message' => 'user created successfully'
             ]);
             $response->setStatus(Request::STATUS_200);
         } else {
-            $response->setData([self::ERROR]);
-            $response->setStatus(Request::STATUS_500);
+            $response->setData(['message' =>$newUser['message']]);
+            $response->setStatus(Request::STATUS_200);
         }
     }
 
     public function delete(Request $request, Response $response)
     {
-        $id = $request->getDataByKey(self::ID_FIELD) ?? 0;
-        $cust = $this->service->fetchById($id);
-        if ($cust && $this->service->remove($cust)) {
-            $response->setData(['success' => self::SUCCESS_DELETE,
+        
+        $id = $response->getData() ?? 0;
+
+        
+        
+        $obj = $this->service->fetchById($id);
+        if ($obj && $this->service->remove($obj)) {
+            $response->setData(['success' => true,
+                                'message' => 'succes delete user',
                 'id' => $id]);
             $response->setStatus(Request::STATUS_200);
         } else {

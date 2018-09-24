@@ -138,5 +138,55 @@ class UsersService {
         $stmt->execute(['id' => $obj->getId()]);
         return ($this->fetchById($obj->getId())) ? FALSE : TRUE;
     }
+    
+    public function createUser( array $data)
+    {
+        $info = array();
+        
+        if ($this->fetchByEmail($data['email'])) {
+           
+             $info= [
+                 'success'=> false,
+                 'item' => false,
+                 'message'=> 'user_exist'
+                 ];
+             
+             return $info;
+        }
+
+       
+        $hash = $this->createHashPassword($data['password']);
+       
+
+        $newData['token'] = bin2hex(random_bytes(16));
+        //$newData['password'] = $hash;
+        $updateData = array_merge($data, $newData);
+        
+        $updateUserData = Users::arrayToEntity($updateData, new Users());
+        
+        $updateUserData->setPassword($hash);
+        
+        $info= [
+                 'success'=> true,
+                 'item' => $updateUserData,
+                 ];
+        
+        return $info;
+    }
+    
+    public function createHashPassword($password)
+    {
+        $random = openssl_random_pseudo_bytes(18);
+
+        $salt = sprintf('$2y$%02d$%s', 13, // 2^n cost factor
+                substr(strtr(base64_encode($random), '+', '.'), 0, 22)
+        );
+        
+       
+        $options = ['cost' => 13,
+            'salt' => $salt];
+
+        return password_hash($password, PASSWORD_BCRYPT, $options);
+    }
 
 }

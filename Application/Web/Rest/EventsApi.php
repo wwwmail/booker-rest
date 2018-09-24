@@ -36,7 +36,7 @@ class EventsApi extends AbstractApi {
 
         if ($id > 0) {
             $result = $this->service->
-                    fetchById($id); 
+                    fetchById($id);
         } else {
 
             $result = [];
@@ -52,7 +52,7 @@ class EventsApi extends AbstractApi {
             $response->setStatus(Request::STATUS_200);
         } else {
             $response->setData([self::ERROR_NOT_FOUND]);
-            $response->setStatus(Request::STATUS_500);
+            $response->setStatus(Request::STATUS_200);
         }
     }
 
@@ -75,41 +75,17 @@ class EventsApi extends AbstractApi {
         $id = $request->getDataByKey(self::ID_FIELD) ?? 0;
         $reqData = $request->getData();
 
-        if ($this->service->fetchByEmail($reqData['email'])) {
+        $event = $this->service->createEvent($reqData);
 
-            $response->setData(['success' => self::_FALSE,
-                'message' => 'user_exist']);
-            $response->setStatus(Request::STATUS_200);
-
-            return;
-        }
-
-        $random = openssl_random_pseudo_bytes(18);
-
-        $salt = sprintf('$2y$%02d$%s', 13, // 2^n cost factor
-                substr(strtr(base64_encode($random), '+', '.'), 0, 22)
-        );
-
-        $options = ['cost' => 13,
-            'salt' => $salt];
-
-        $hash = password_hash($reqData['password'], PASSWORD_BCRYPT, $options);
-
-        $data['token'] = bin2hex(random_bytes(16));
-        $data['password'] = $hash;
-        $updateData = array_merge($reqData, $data);
-
-        $updateCust = Events::arrayToEntity($updateData, new Events());
-
-        //var_dump($updateCust);die;
-        if ($this->service->save($updateCust)) {
+        if ($event === true) {
             $response->setData(['success' => self::_TRUE,
-                'message' => 'user created successfully'
+                'message' => 'event created successfully'
             ]);
             $response->setStatus(Request::STATUS_200);
         } else {
-            $response->setData([self::ERROR]);
-            $response->setStatus(Request::STATUS_500);
+            $response->setData(['succes' => self::_FALSE,
+                'message' => $event]);
+            $response->setStatus(Request::STATUS_200);
         }
     }
 

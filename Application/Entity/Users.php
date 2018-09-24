@@ -62,8 +62,9 @@ class Users extends Base {
 
     public function setPassword($password)
     {
-
-        $this->password = $password;
+        if($password && !empty($password)){
+            $this->password = $password;
+        }
     }
 
     public function getToken()
