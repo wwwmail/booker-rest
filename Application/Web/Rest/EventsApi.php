@@ -12,6 +12,7 @@ use Application\Database\{
     Connection,
     EventsService
 };
+use Application\Helper\AppHelper;
 
 class EventsApi extends AbstractApi {
 
@@ -28,6 +29,7 @@ class EventsApi extends AbstractApi {
         parent::__construct($registeredKeys, $tokenField);
         $this->service = new EventsService(
                 new Connection($dbparams));
+        $this->helper  = new AppHelper('UsersService', $dbparams);
     }
 
     public function get(Request $request, Response $response)
@@ -74,8 +76,10 @@ class EventsApi extends AbstractApi {
     {
         $id = $request->getDataByKey(self::ID_FIELD) ?? 0;
         $reqData = $request->getData();
-
-        $event = $this->service->createEvent($reqData);
+        
+        $user_id = $this->helper->getAuthUserId();
+        
+        $event = $this->service->createEvent($reqData,$user_id);
 
         if ($event === true) {
             $response->setData(['success' => self::_TRUE,

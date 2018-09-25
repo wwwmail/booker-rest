@@ -10,6 +10,7 @@ class EventsService {
 
     protected $connection;
     private $firstInsertId;
+
     public function __construct(Connection $connection)
     {
         $this->connection = $connection;
@@ -38,24 +39,32 @@ class EventsService {
 
     public function creatSimpleEvent(array $data)
     {
-        
-        $sql = 'INSERT INTO app_events SET recursion = :recursion, '
-                . 'recursion_id = :recursion_id, user_id = :user_id,'
-                . 'room_id = :room_id, description = :description,'
-                . 'date = :date, starttime = :starttime,'
-                . 'endtime = :endtime';
+        $check = $this->checkAvaliableDate($data['starttime'], $data['endtime']);
+        if (!$check) {
+            $sql = 'INSERT INTO app_events SET recursion = :recursion, '
+                    . 'recursion_id = :recursion_id, user_id = :user_id,'
+                    . 'room_id = :room_id, description = :description,'
+                    . 'date = :date, starttime = :starttime,'
+                    . 'endtime = :endtime';
 
-        $stmt = $this->connection->pdo->prepare($sql);
+            $stmt = $this->connection->pdo->prepare($sql);
 
-        return $stmt->execute(['recursion' => $data['recursion'],
-                    'recursion_id' => $data['recursion_id'],
-                    'user_id' => $data['user_id'],
-                    'room_id' => $data['room_id'],
-                    'description' => $data['description'],
-                    'date' => $data['date'],
-                    'starttime' => date('Y-m-d H:i:s', strtotime($data['starttime'])),
-                    'endtime' => date('Y-m-d H:i:s', strtotime($data['endtime'])),
-        ]);
+            return $stmt->execute(['recursion' => $data['recursion'],
+                        'recursion_id' => $data['recursion_id'],
+                        'user_id' => $data['user_id'],
+                        'room_id' => $data['room_id'],
+                        'description' => $data['description'],
+                        'date' => $data['date'],
+                        'starttime' => date('Y-m-d H:i:s', strtotime($data['starttime'])),
+                        'endtime' => date('Y-m-d H:i:s', strtotime($data['endtime'])),
+            ]);
+        } else {
+            $events = '';
+            foreach ($check as $item) {
+                $events .= "from {$item['starttime']} - to {$item['endtime']}";
+            }
+            return "event exixt  {$events}";
+        }
     }
 
     public function creatRecursionEvent($recursion_type, array $data)
@@ -73,13 +82,12 @@ class EventsService {
             default:
                 return $this->creatSimpleEvent($data);
         }
-        
-        
     }
 
     public function creatWeeklyEvent(array $data)
     {
         $success = false;
+        $flag = true;
         try {
             $sql = 'INSERT INTO app_events SET recursion = :recursion, '
                     . 'recursion_id = :recursion_id, user_id = :user_id,'
@@ -87,17 +95,23 @@ class EventsService {
                     . 'date = :date, starttime = :starttime,'
                     . 'endtime = :endtime';
             $stmt = $this->connection->pdo->prepare($sql);
-            
-            //$firstInsertId = '';
+
+            $events = 'events exist ';
+            $this->connection->pdo->setAttribute(PDO::ATTR_AUTOCOMMIT, TRUE);
             $this->connection->pdo->beginTransaction();
-            for ($i = 0; $i < 4; $i++) {
-               // $this->connection->pdo->beginTransaction();
+
+            for ($i = 0; $i < $data['recursion_value']; $i++) {
+
+                //       $this->connection->pdo->beginTransaction();
                 $date = 7 * $i;
-                if($i == 1){
+                if ($i == 1) {
                     $this->firstInsertId = $this->connection->pdo->lastInsertId();
                 }
-                
-                //
+
+                $check = $this->checkAvaliableDate(
+                        date('Y-m-d H:i:s', strtotime($data['starttime'] . " +{$date} days")), 
+                        date('Y-m-d H:i:s', strtotime($data['endtime'] . " +{$date} days")));
+
                 $stmt->execute(['recursion' => $data['recursion'],
                     'recursion_id' => $this->firstInsertId,
                     'user_id' => $data['user_id'],
@@ -107,9 +121,22 @@ class EventsService {
                     'starttime' => date('Y-m-d H:i:s', strtotime($data['starttime'] . " +{$date} days")),
                     'endtime' => date('Y-m-d H:i:s', strtotime($data['endtime'] . " +{$date} days")),
                 ]);
+                if (!$check) {
+                    $success = true;
+                } else {
+                    foreach ($check as $item) {
+                        $events .= "from {$item['starttime']} - to {$item['endtime']} ";
+                    }
+                    $flag = false;
+                }
             }
-            $this->connection->pdo->commit();
-            $success = true;
+
+            if (!$flag) {
+                $this->connection->pdo->rollBack();
+                return $events;
+            }
+            
+             $this->connection->pdo->commit();
         } catch (PDOException $e) {
             $this->connection->pdo->rollBack();
             echo $e->getMessage();
@@ -121,6 +148,7 @@ class EventsService {
     public function creatBiWeeklyEvent(array $data)
     {
         $success = false;
+        $flag = true;
         try {
             $sql = 'INSERT INTO app_events SET recursion = :recursion, '
                     . 'recursion_id = :recursion_id, user_id = :user_id,'
@@ -129,14 +157,22 @@ class EventsService {
                     . 'endtime = :endtime';
             $stmt = $this->connection->pdo->prepare($sql);
 
+            $events = 'events exist ';
+            $this->connection->pdo->setAttribute(PDO::ATTR_AUTOCOMMIT, TRUE);
             $this->connection->pdo->beginTransaction();
-            for ($i = 0; $i < 2; $i++) {
-                if($i == 1){
+
+            for ($i = 0; $i <= $data['recursion_value']; $i++) {
+
+                //       $this->connection->pdo->beginTransaction();
+                $date = 14 * $i;
+                if ($i == 1) {
                     $this->firstInsertId = $this->connection->pdo->lastInsertId();
                 }
-                $date = 14 * $i;
 
-                $this->connection->pdo->beginTransaction();
+                $check = $this->checkAvaliableDate(
+                        date('Y-m-d H:i:s', strtotime($data['starttime'] . " +{$date} days")), 
+                        date('Y-m-d H:i:s', strtotime($data['endtime'] . " +{$date} days")));
+
                 $stmt->execute(['recursion' => $data['recursion'],
                     'recursion_id' => $this->firstInsertId,
                     'user_id' => $data['user_id'],
@@ -146,9 +182,22 @@ class EventsService {
                     'starttime' => date('Y-m-d H:i:s', strtotime($data['starttime'] . " +{$date} days")),
                     'endtime' => date('Y-m-d H:i:s', strtotime($data['endtime'] . " +{$date} days")),
                 ]);
+                if (!$check) {
+                    $success = true;
+                } else {
+                    foreach ($check as $item) {
+                        $events .= "from {$item['starttime']} - to {$item['endtime']} ";
+                    }
+                    $flag = false;
+                }
             }
-            $this->connection->pdo->commit();
-            $success = true;
+
+            if (!$flag) {
+                $this->connection->pdo->rollBack();
+                return $events;
+            }
+            
+             $this->connection->pdo->commit();
         } catch (PDOException $e) {
             $this->connection->pdo->rollBack();
             echo $e->getMessage();
@@ -156,10 +205,11 @@ class EventsService {
 
         return $success;
     }
-    
+
     public function creatMonthlyEvent(array $data)
     {
         $success = false;
+        $flag = true;
         try {
             $sql = 'INSERT INTO app_events SET recursion = :recursion, '
                     . 'recursion_id = :recursion_id, user_id = :user_id,'
@@ -168,25 +218,47 @@ class EventsService {
                     . 'endtime = :endtime';
             $stmt = $this->connection->pdo->prepare($sql);
 
+            $events = 'events exist ';
+            $this->connection->pdo->setAttribute(PDO::ATTR_AUTOCOMMIT, TRUE);
             $this->connection->pdo->beginTransaction();
-            for ($i = 1; $i < 13; $i++) {
-                if($i == 2){
+
+            for ($i = 0; $i <= $data['recursion_value']; $i++) {
+
+                //       $this->connection->pdo->beginTransaction();
+                $date = $i;
+                if ($i == 1) {
                     $this->firstInsertId = $this->connection->pdo->lastInsertId();
                 }
-              
-                $this->connection->pdo->beginTransaction();
+
+                $check = $this->checkAvaliableDate(
+                        date('Y-m-d H:i:s', strtotime($data['starttime'] . " +{$date} month")), 
+                        date('Y-m-d H:i:s', strtotime($data['endtime'] . " +{$date} month")));
+
                 $stmt->execute(['recursion' => $data['recursion'],
                     'recursion_id' => $this->firstInsertId,
                     'user_id' => $data['user_id'],
                     'room_id' => $data['room_id'],
                     'description' => $data['description'],
-                    'date' => date('Y-m-d H:i:s', strtotime($data['date'] . " +{$i} month")),
-                    'starttime' => date('Y-m-d H:i:s', strtotime($data['starttime'] . " +{$i} month")),
-                    'endtime' => date('Y-m-d H:i:s', strtotime($data['endtime'] . " +{$i} month")),
+                    'date' => date('Y-m-d H:i:s', strtotime($data['date'] . " +{$date} month")),
+                    'starttime' => date('Y-m-d H:i:s', strtotime($data['starttime'] . " +{$date} month")),
+                    'endtime' => date('Y-m-d H:i:s', strtotime($data['endtime'] . " +{$date} month")),
                 ]);
+                if (!$check) {
+                    $success = true;
+                } else {
+                    foreach ($check as $item) {
+                        $events .= "from {$item['starttime']} - to {$item['endtime']} ";
+                    }
+                    $flag = false;
+                }
             }
-            $this->connection->pdo->commit();
-            $success = true;
+
+            if (!$flag) {
+                $this->connection->pdo->rollBack();
+                return $events;
+            }
+            
+             $this->connection->pdo->commit();
         } catch (PDOException $e) {
             $this->connection->pdo->rollBack();
             echo $e->getMessage();
@@ -195,48 +267,52 @@ class EventsService {
         return $success;
     }
 
-    public function createEvent(array $data)
+    public function createEvent(array $data, int $user_id)
     {
+        if (!$data['user_id']) {
+            $data['user_id'] = $user_id;
+        }
         $filter = Filter::check($data, array(
                     'user_id' => ['required' => true, 'numeric' => true],
                     'room_id' => ['required' => true, 'numeric' => true],
-                    'recursion' => ['zirrow_one' => true],
+                    // 'recursion' => ['zirrow_one' => true],
                     'description' => ['required' => true],
                     'date' => ['required' => true, 'date' => date('Y-m-d')],
-                    'starttime' => ['required' => true, 'date' => date("Y-m-d G:i"), 'hour'=> true],
-                    'endtime' => ['required' => true, 'date' => $data['starttime'], 'hour'=> true],
+                    'starttime' => ['required' => true, 'date' => date("Y-m-d G:i"), 'hour' => true],
+                    'endtime' => ['required' => true, 'date' => $data['starttime'], 'hour' => true],
                     'recursion_type' => [$data['recursion'] ? 'required' : '' => true],
+                    'recursion_value' => [$data['recursion_type'] ? 'required' : '' => true, 'recursion_type' => $data['recursion_type']]
         ));
-        
-        
+
+
+
+
 //        $a = $this->checkAvaliableDate($data['starttime'], $data['endtime']);
-        
 //        var_dump($a); die;
-        
+//        var_dump($data['recursion_type']); die;
+
 
         if ($filter->passed()) {
 
             return $this->creatRecursionEvent($data['recursion_type'], $data);
-           
         } else {
             return $filter->errors();
         }
     }
-    
-    public function checkAvaliableDate($starttime, $endtime)
+
+    private function checkAvaliableDate($starttime, $endtime)
     {
-        $starttime = date('Y-m-d H:i:s', strtotime($starttime.' +1 minutes'));
-        $endtime = date('Y-m-d H:i:s', strtotime($endtime.' +1 minutes'));
-                      
+        $starttime = date('Y-m-d H:i:s', strtotime($starttime . ' +1 minutes'));
+        $endtime = date('Y-m-d H:i:s', strtotime($endtime . ' +1 minutes'));
+
         $sql = "SELECT * FROM app_events WHERE ('$starttime' BETWEEN `starttime` AND `endtime` "
                 . "OR '$endtime' BETWEEN `starttime` AND `endtime` "
                 . "OR `starttime` BETWEEN '$starttime' AND '$endtime'"
-                . "OR `endtime` BETWEEN '$starttime' AND '$endtime')"; 
+                . "OR `endtime` BETWEEN '$starttime' AND '$endtime')";
         $stmt = $this->connection->pdo->prepare($sql);
-        
+
         $stmt->execute();
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
-        
     }
 
     public function save(Events $obj)

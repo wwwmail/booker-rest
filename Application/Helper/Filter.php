@@ -112,5 +112,28 @@ class Filter {
             $this->add_error("{$item} can't be less then 8 AM and more then 8 PM");
         }
     }
+    
+    public function filter_recursion_type($value, $rule_value, $item)
+    {
+        //var_dump($value); die;
+        switch ($rule_value) {
+            case 'weekly':
+                if(!in_array($value,[1,2,3,4])){
+                     $this->add_error("{$rule_value} can be 1, 2, 3, or 4");
+                }
+                break;
+            case 'bi-weekly':
+                if(!in_array($value, [1,2])){
+                     $this->add_error("{$rule_value} can be 1 or 2");
+                }
+                break;
+            case 'monthly':
+                if(!in_array($value, [1,2])){
+                     $this->add_error("{$rule_value} can be 1");
+                }
+                break;
+        }
+        
+    }
 
 }
