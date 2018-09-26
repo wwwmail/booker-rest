@@ -4,8 +4,7 @@ namespace Application\Web\Rest;
 
 use Application\Web\{
     Request,
-    Response,
-    Received
+    Response
 };
 use Application\Entity\Users;
 use Application\Database\{

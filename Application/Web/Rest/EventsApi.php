@@ -4,8 +4,7 @@ namespace Application\Web\Rest;
 
 use Application\Web\{
     Request,
-    Response,
-    Received
+    Response
 };
 use Application\Entity\Events;
 use Application\Database\{
@@ -60,15 +59,17 @@ class EventsApi extends AbstractApi {
 
     public function put(Request $request, Response $response)
     {
-        $data = json_decode(file_get_contents('php://input'), true);
-
-        $cust = Events::arrayToEntity($data['data'], new Events());
-        if ($newCust = $this->service->save($cust)) {
-            $response->setData(['success' => self::SUCCESS_UPDATE]);
+       $data = json_decode(file_get_contents('php://input'), true);
+        
+       $result =  $this->service->updateEvent($data['data'], $data['recursion']);
+        
+      
+        if ($result === true) {
+            $response->setData(['success' => self::_TRUE,'message' => 'success updated']);
             $response->setStatus(Request::STATUS_200);
         } else {
-            $response->setData([self::ERROR]);
-            $response->setStatus(Request::STATUS_500);
+            $response->setData(['success' => self::_FALSE, 'message' => $result]);
+            $response->setStatus(Request::STATUS_200);
         }
     }
 
@@ -95,15 +96,23 @@ class EventsApi extends AbstractApi {
 
     public function delete(Request $request, Response $response)
     {
+      
         $id = $request->getDataByKey(self::ID_FIELD) ?? 0;
-        $cust = $this->service->fetchById($id);
-        if ($cust && $this->service->remove($cust)) {
-            $response->setData(['success' => self::SUCCESS_DELETE,
-                'id' => $id]);
+        
+        $data = json_decode(file_get_contents('php://input'), true);
+        
+        $result = $this->service->removeEvent($id, $data['recursion']);
+        
+
+       if ($result === true) {
+            $response->setData(['success' => self::_TRUE,
+                'message' => 'event delete successfully'
+            ]);
             $response->setStatus(Request::STATUS_200);
         } else {
-            $response->setData([self::ERROR_NOT_FOUND]);
-            $response->setStatus(Request::STATUS_500);
+            $response->setData(['succes' => self::_FALSE,
+                'message' => $result]);
+            $response->setStatus(Request::STATUS_200);
         }
     }
 

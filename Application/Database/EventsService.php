@@ -314,6 +314,82 @@ class EventsService {
         $stmt->execute();
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
+    
+    
+    public function updateEvent(array $data, $recursion=0)
+    {
+        $data['starttime'] = date('Y-m-d H:i:s' , strtotime($data['date'].' '.$data['newStartTime']));
+        $data['endtime'] = date('Y-m-d H:i:s' , strtotime($data['date'].' '.$data['newEndTime']));
+        
+       
+        $filter = Filter::check($data, array(
+                    'id' => ['required' => true, 'numeric' => true],
+                    'description' => ['required' => true],
+                    'starttime' => ['required' => true, 'date' => date("Y-m-d G:i"), 'hour' => true],
+                    'endtime' => ['required' => true, 'date' => $data['starttime'], 'hour' => true],
+                    
+                   ));
+         
+         if ($filter->passed()) {
+             
+             if($recursion != '1'){
+                return $this->updateSimpleEvent($data);
+             }else{
+                return $this->updateRecursionEvent($data);
+             }
+        } else {
+            return $filter->errors();
+        }
+        
+    }
+    
+    public function updateSimpleEvent(array $data)
+    {
+        $sql = "UPDATE app_events SET description=?, starttime=?, endtime=? WHERE id=?";
+         $stmt = $this->connection->pdo->prepare($sql);
+         return $stmt->execute([$data['description'], $data['starttime'], $data['endtime'], $data['id']]); 
+    }
+    
+    public function updateRecursionEvent(array $data)
+    {
+        $sql ="UPDATE app_events SET description = ?, "
+                . "starttime = DATE_FORMAT(starttime, '%Y-%m-%d {$data['newStartTime']}:%s'),"
+                . "endtime = DATE_FORMAT(endtime, '%Y-%m-%d {$data['newEndTime']}:%s') WHERE id = ? OR recursion_id=? ";
+
+        $stmt = $this->connection->pdo->prepare($sql);
+        return $stmt->execute([$data['description'], $data['id'],$data['id']]); 
+    }
+    
+     public function removeEvent($id, $recursion=0)
+    {
+         
+        
+             
+             if($recursion != '1'){
+                return $this->removeEventSimple($id);
+             }else{
+                return $this->removeEventRecursion($id);
+             }
+        
+        
+    }
+    
+    public function removeEventSimple($id)
+    {
+        $sql ="DELETE FROM app_events WHERE id = ? OR recursion_id=? ";
+
+        $stmt = $this->connection->pdo->prepare($sql);
+        return $stmt->execute([$id, $id]); 
+    }
+    
+    public function removeEventRecursion($id)
+    {
+        $sql ="DELETE FROM app_events WHERE id = ?";
+
+        $stmt = $this->connection->pdo->prepare($sql);
+        return $stmt->execute([$id]); 
+        
+    }
 
     public function save(Events $obj)
     {
