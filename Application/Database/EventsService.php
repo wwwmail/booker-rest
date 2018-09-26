@@ -37,6 +37,17 @@ class EventsService {
         }
     }
 
+
+    public function fetchByRoom($id)
+    {
+        
+         $stmt = $this->connection->pdo
+                ->prepare(Finder::select('app_events')
+                ->where('room_id = :id')::getSql());
+         $stmt->execute(['id' => (int) $id]);
+         return $stmt->fetchAll(PDO::FETCH_ASSOC);
+    }
+
     public function creatSimpleEvent(array $data)
     {
         $check = $this->checkAvaliableDate($data['starttime'], $data['endtime']);

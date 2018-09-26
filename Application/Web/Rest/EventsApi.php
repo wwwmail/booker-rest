@@ -33,19 +33,25 @@ class EventsApi extends AbstractApi {
 
     public function get(Request $request, Response $response)
     {
-        $id = $response->getData() ?? 0;
-
-        if ($id > 0) {
-            $result = $this->service->
-                    fetchById($id);
-        } else {
-
+       // var_dump($request->getFilterData()); die;
+        if (method_exists($this->service, $request->getFilter()) && !empty($request->getFilterData())) {
+            $filter = $request->getFilter();
             $result = [];
-
-            $fetch = $this->service->fetchAll();
-
+            $fetch = $this->service->$filter($request->getFilterData());
             foreach ($fetch as $row) {
                 $result[] = $row;
+            }
+        } else {
+            $id = $response->getData() ?? 0;
+            if ($id > 0) {
+                $result = $this->service->
+                    fetchById($id); 
+            } else {
+                $result = [];
+                $fetch = $this->service->fetchAll();
+                foreach ($fetch as $row) {
+                    $result[] = $row;
+                }
             }
         }
         if ($result) {
@@ -54,7 +60,7 @@ class EventsApi extends AbstractApi {
         } else {
             $response->setData([self::ERROR_NOT_FOUND]);
             $response->setStatus(Request::STATUS_200);
-        }
+        }    
     }
 
     public function put(Request $request, Response $response)
