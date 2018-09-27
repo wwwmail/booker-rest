@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<phpunit bootstrap="loader.php" colors="true">
+<testsuites>
+    <testsuite>
+        <directory>tests</directory>
+    </testsuite>
+</testsuites>
+<php>
+    <var name="DB_DSN" value="mysql:dbname=user4;host=localhost" />
+    <var name="DB_USER" value="user4" />
+    <var name="DB_PASSWD" value="user4" />
+    <var name="DB_DBNAME" value="user4" />
+</php>
+</phpunit>

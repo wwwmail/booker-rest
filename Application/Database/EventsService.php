@@ -40,10 +40,9 @@ class EventsService {
 
     public function fetchByRoom($id)
     {
-        
+       $sql = "SELECT * FROM app_events WHERE room_id = :id ORDER BY starttime"; 
          $stmt = $this->connection->pdo
-                ->prepare(Finder::select('app_events')
-                ->where('room_id = :id')::getSql());
+                ->prepare(Finder::getSql($sql));
          $stmt->execute(['id' => (int) $id]);
          return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
@@ -461,7 +460,7 @@ class EventsService {
         $sql ="DELETE FROM app_events WHERE id = ? OR recursion_id=? AND id >= ?  ";
 
         $stmt = $this->connection->pdo->prepare($sql);
-        return $stmt->execute([$id, $id]); 
+        return $stmt->execute([$id, $id, $id]); 
     }
     
     public function removeEventSimple($id)
