@@ -43,7 +43,7 @@ class Filter {
 
     public function errors()
     {
-        return $this->_errors;
+        return implode(', ', $this->_errors);//$this->_errors;
     }
 
     public function passed()
@@ -113,7 +113,23 @@ class Filter {
         }
     }
     
-    public function filter_recursion_type($value, $rule_value, $item)
+    public function filter_minutes($value, $rule_value, $item)
+    {
+        $last_minutes = strtotime($value);
+        
+        $first_minutes = strtotime($rule_value);
+        
+        $difference = (int) $last_minutes - (int) $first_minutes;
+        
+        $difference = $difference / 60 ;
+        
+        
+        if ( $difference    < 30 ) {
+            $this->add_error("{$item} can't be less then 30 from start time");
+        }
+    }
+
+        public function filter_recursion_type($value, $rule_value, $item)
     {
         //var_dump($value); die;
         switch ($rule_value) {

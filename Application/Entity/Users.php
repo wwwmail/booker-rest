@@ -14,6 +14,7 @@ class Users extends Base {
     protected $expire = '';
     protected $password = '';
     public $isAdmin;
+    public $isActive;
     protected $mapping = [
         'id' => 'id',
         'email' => 'email',
@@ -22,7 +23,8 @@ class Users extends Base {
         'token' => 'token',
         'expire' => 'expire',
         'password' => 'password',
-        'is_admin' => 'isAdmin'
+        'is_admin' => 'isAdmin',
+        'is_active' => 'isActive',
     ];
 
     public function getFirstName()
@@ -102,6 +104,18 @@ class Users extends Base {
     {
         if ($isAdmin) {
             $this->isAdmin = $isAdmin;
+        }
+    }
+    
+    public function getIsActive()
+    {
+        return $this->isActive;
+    }
+
+    public function setIsActive($isActive)
+    {
+        if ($isActive) {
+            $this->isActive = $isActive;
         }
     }
 

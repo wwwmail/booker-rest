@@ -35,10 +35,10 @@ class Request extends AbstractHttp {
             $data = explode ('/', substr ($_SERVER['REQUEST_URI'], 1));
            // var_dump $data; die;
 
-            //$data['1']
-            if(is_array($data) && isset($data[4])){
+            //$data['4']
+            if(is_array($data) && isset($data[1])){
                 unset($data[0]);
-                $this->data = $data[4];
+                $this->data = $data[1];
                 } else {
                     $this->data = null;
             }

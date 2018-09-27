@@ -40,7 +40,8 @@ class AuthApi extends AbstractApi {
             }
             $response->setData(['success' => self::_TRUE,
                 'message' => 'succes Auth',
-                'admin' => $admin]);
+                'admin' => $admin,
+                'id'=>$user->getid()]);
             $response->setStatus(Request::STATUS_200);
         } else {
             $response->setData(['success' => self::_FALSE,
