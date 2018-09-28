@@ -1,5 +1,5 @@
 {
     "require-dev": {
-        "phpunit/dbunit": "^4.0"
+        "phpunit/dbunit": "^2.0"
     }
 }
