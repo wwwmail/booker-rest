@@ -21,9 +21,8 @@ class AuthApi extends AbstractApi {
 
     protected $service;
 
-    public function __construct($registeredKeys, $dbparams, $tokenField = NULL)
+    public function __construct($dbparams)
     {
-        parent::__construct($registeredKeys, $tokenField);
         $this->service = new UsersService(
                 new Connection($dbparams));
     }

@@ -8,16 +8,14 @@ header('Access-Control-Allow-Headers: Access-Control-Allow-Headers, Origin,Accep
 header('Content-Type: application/json');
 header('Accept-Language: en');
 header('Accept-Charset: utf-8');
-// simple REST server
+
 include __DIR__ .  '/config/db.config.php';
 include __DIR__ .  '/config/app.config.php';
-// setup class autoloading
+
+
 
 require __DIR__ .'/loader.php';
-//require __DIR__ . '/Application/Autoload/Loader.php';
 
-// add current directory to the path
-//Application\Autoload\Loader::init(__DIR__ . '/');
 
 use Application\App;
 

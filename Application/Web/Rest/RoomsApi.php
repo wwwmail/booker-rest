@@ -23,9 +23,8 @@ class RoomsApi extends AbstractApi {
 
     protected $service;
 
-    public function __construct($registeredKeys, $dbparams, $tokenField = NULL)
+    public function __construct($dbparams)
     {
-        parent::__construct($registeredKeys, $tokenField);
         $this->service = new RoomsService(
                 new Connection($dbparams));
         //$this->helper  = new AppHelper('RoomsService', $dbparams);
@@ -59,8 +58,7 @@ class RoomsApi extends AbstractApi {
 
     public function put(Request $request, Response $response)
     {
-        $data = json_decode(file_get_contents('php://input'), true);
-
+        $data = $request->getData();
         $obj = Rooms::arrayToEntity($data['data'], new Rooms());
         if ($newCust = $this->service->save($obj)) {
             $response->setData(['success' => self::_TRUE,'message'=>'update successfuly']);
@@ -75,7 +73,7 @@ class RoomsApi extends AbstractApi {
     {
         $id = $request->getDataByKey(self::ID_FIELD) ?? 0;
         $reqData = $request->getData();
-        
+                
         $filter = Filter::check($reqData, array(
                     'name' => ['required' => true,],
         ));

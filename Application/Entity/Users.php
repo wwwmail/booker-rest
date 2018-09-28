@@ -27,37 +27,37 @@ class Users extends Base {
         'is_active' => 'isActive',
     ];
 
-    public function getFirstName()
+    public function getFirstName(): string
     {
         return $this->first_name;
     }
 
     public function setFirstName($name)
     {
-        $this->first_name = $name;
+        $this->first_name = (string)$name;
     }
 
-    public function getLastName()
+    public function getLastName(): string
     {
         return $this->last_name;
     }
 
     public function setLastName($name)
     {
-        $this->last_name = $name;
+        $this->last_name = (string)$name;
     }
 
-    public function getEmail()
+    public function getEmail(): string
     {
         return $this->email;
     }
 
     public function setEmail($email)
     {
-        $this->email = $email;
+        $this->email = (string)$email;
     }
 
-    public function getPassword()
+    public function getPassword(): string
     {
         return $this->password;
     }
@@ -65,11 +65,11 @@ class Users extends Base {
     public function setPassword($password)
     {
         if($password && !empty($password)){
-            $this->password = $password;
+            $this->password = (string)$password;
         }
     }
 
-    public function getToken()
+    public function getToken(): string
     {
         return $this->token;
     }
@@ -77,25 +77,20 @@ class Users extends Base {
     public function setToken($token)
     {
         //bin2hex(random_bytes(16))
-        $this->token = $token;
+        $this->token = (string)$token;
     }
 
-    public function getExpire()
+    public function getExpire(): string
     {
         return $this->expire;
     }
 
     public function setExpire($expire)
     {
-        $this->expire = $expire;
+        $this->expire = (string)$expire;
     }
 
-    public function getDiscount(): string
-    {
-        return $this->user_discount;
-    }
-
-    public function getIsAdmin()
+    public function getIsAdmin():int
     {
         return $this->isAdmin;
     }
@@ -103,11 +98,11 @@ class Users extends Base {
     public function setIsAdmin($isAdmin)
     {
         if ($isAdmin) {
-            $this->isAdmin = $isAdmin;
+            $this->isAdmin = (int)$isAdmin;
         }
     }
     
-    public function getIsActive()
+    public function getIsActive(): int
     {
         return $this->isActive;
     }
@@ -115,7 +110,7 @@ class Users extends Base {
     public function setIsActive($isActive)
     {
         if ($isActive) {
-            $this->isActive = $isActive;
+            $this->isActive = (int)$isActive;
         }
     }
 

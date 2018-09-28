@@ -23,6 +23,7 @@ class Server {
         $getPost = $_REQUEST ?? array();
         $jsonData = json_decode(
                 file_get_contents('php://input'), true);
+    
         $jsonData = $jsonData ?? array();
         $request->setData(array_merge($getPost, $jsonData));
         $id = $request->getData()[$this->api::ID_FIELD] ?? NULL;

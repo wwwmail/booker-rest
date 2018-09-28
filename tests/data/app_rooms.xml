@@ -1,5 +1,7 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <dataset>
-    <user id="1" name="Serg" email="serg@gmail.com" />
-    <user id="2" name="Vasya" email="vasya@gmail.com" />
+    <person
+        id="1"
+       name="Nalabal room test"
+       />
 </dataset>

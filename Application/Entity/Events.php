@@ -29,58 +29,58 @@ class Events extends Base {
         'created' => 'created',
     ];
     
-    public function getRecursion()
+    public function getRecursion(): int
     {
         return $this->recursion;
     }
 
     public function setRecursion($id)
     {
-        $this->recursion = $id;
+        $this->recursion = (int)$id;
     }
     
-    public function getRecursionId()
+    public function getRecursionId(): int
     {
         return $this->recursion_id;
     }
 
     public function setRecursionId($id)
     {
-        $this->recursion_id = $id;
+        $this->recursion_id = (int)$id;
     }
 
-    public function getUserId()
+    public function getUserId(): int
     {
         return $this->user_id;
     }
 
     public function setUserId($id)
     {
-        $this->user_id = $id;
+        $this->user_id = (int)$id;
     }
 
-    public function getRoomId()
+    public function getRoomId(): int
     {
         return $this->room_id;
     }
 
     public function setRoomId($id)
     {
-        $this->room_id = $id;
+        $this->room_id = (int)$id;
     }
 
-    public function getDescription()
+    public function getDescription(): string
     {
-        return $this->password;
+        return $this->description;
     }
 
     public function setDescription($description)
     {
 
-        $this->description = $description;
+        $this->description = (string) $description;
     }
     
-    public function getDate()
+    public function getDate(): string
     {
         return $this->date;
     }
@@ -88,37 +88,37 @@ class Events extends Base {
     public function setDate($date)
     {
 
-        $this->date = $date;
+        $this->date = (string)$date;
     }
 
-    public function getStarttime()
+    public function getStarttime(): string
     {
         return $this->starttime;
     }
 
     public function setStarttime($time)
     {
-        $this->starttime = $time;
+        $this->starttime = (string)$time;
     }
 
-    public function getEndtime()
+    public function getEndtime(): string
     {
         return $this->endtime;
     }
 
     public function setEndtime($time)
     {
-        $this->endtime = $time;
+        $this->endtime = (string)$time;
     }
 
-    public function getCreated()
+    public function getCreated(): string
     {
-        return $this->cre;
+        return $this->created;
     }
 
     public function setCreated($time)
     {
-        $this->created = $time;
+        $this->created = (string)$time;
     }
 
 }

@@ -57,7 +57,7 @@ class UsersApi extends AbstractApi {
 
     public function put(Request $request, Response $response)
     {
-        $data = json_decode(file_get_contents('php://input'), true);
+        $data = $request->getData();
 
         $user = $this->service->fetchById($data['data']['id']);
         //var_dump($data); die;

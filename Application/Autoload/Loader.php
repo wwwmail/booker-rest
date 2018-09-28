@@ -43,7 +43,6 @@ class Loader
                 break;
             }
             
-           // echo $file; die;
         }
         if (!$success) {
             if (!self::loadFile(__DIR__ . DIRECTORY_SEPARATOR . $fn)) {

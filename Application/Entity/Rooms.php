@@ -6,7 +6,7 @@ class Rooms extends Base {
 
     const TABLE_NAME = 'app_rooms';
 
-    public $id = '';
+   
     public $name = '';
 
     protected $mapping = [
@@ -14,14 +14,14 @@ class Rooms extends Base {
         'name' => 'name',
     ];
 
-    public function getName()
+    public function getName(): string
     {
         return $this->name;
     }
 
     public function setName($name)
     {
-        $this->name = $name;
+        $this->name = (string)$name;
     }
 
 }

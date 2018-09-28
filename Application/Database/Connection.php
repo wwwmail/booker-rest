@@ -29,26 +29,9 @@ class Connection {
         }
     }
 
-    public static function factory(
-    $driver, $dbname, $host, $user, $pwd, array $options = array())
-    {
-        $dsn = $this->makeDsn($config);
-        try {
-            return new PDO($dsn, $user, $pwd, $options);
-        } catch (PDOException $e) {
-            error_log($e->getMessage);
-        }
-    }
-
     public function makeDsn($config)
     {
-        $dsn = $config['driver'] . ':';
-        unset($config['driver']);
-        foreach ($config as $key => $value) {
-            $dsn .= $key . '=' . $value . ';';
-        }
-
-        return substr($dsn, 0, -1);
+      return  $dsn = "{$config['driver']}:dbname={$config['dbname']};host={$config['host']}";
     }
 
 }

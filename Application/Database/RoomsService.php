@@ -19,7 +19,7 @@ class RoomsService {
         $stmt = $this->connection->pdo
                 ->prepare(Finder::select('app_rooms')
                 ->where('id = :id')::getSql());
-        $stmt->execute(['id' => (int) $id]);
+        $stmt->execute(['id' => (int)$id]);
         return Rooms::arrayToEntity(
                         $stmt->fetch(PDO::FETCH_ASSOC), new Rooms());
     }
@@ -87,7 +87,7 @@ class RoomsService {
         foreach ($values as $column => $value) {
             $sql .= $column . ' = :' . $column . ',';
         }
-
+        
         $sql = substr($sql, 0, -1) . $where;
         $success = FALSE;
         try {

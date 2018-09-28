@@ -40,6 +40,13 @@ class UsersTest extends TestCase
         $this->users->setLastName('Yasinskiy');
         $this->assertEquals('Yasinskiy', $this->users->getLastName());
     }
+    
+    
+    public function testSetTypeLastName()
+    {
+        $this->users->setLastName('Yasinskiy');
+        $this->assertInternalType('string', $this->users->getLastName());
+    }
 
     
     public function testSetPassword()
@@ -47,5 +54,19 @@ class UsersTest extends TestCase
         $this->users->setPassword('123');
         $this->assertEquals('123', $this->users->getPassword());
     }
+    
+    public function testSetToken()
+    {
+        $this->users->setToken('qqq');
+        $this->assertEquals('qqq', $this->users->getToken());
+    }
+    
+    public function testAttributeMapping()
+    {
+        $this->assertClassHasAttribute('mapping', 'Application\Entity\Users');
+    }
+    
+    
+    
 
 }

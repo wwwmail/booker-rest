@@ -39,10 +39,10 @@ class Base {
         return $data;
     }
 
-    protected static function isMultiArray($arr)
-    {
-        rsort($arr);
-        return isset($arr[0]) && is_array($arr[0]);
-    }
+//    protected static function isMultiArray($arr)
+//    {
+//        rsort($arr);
+//        return isset($arr[0]) && is_array($arr[0]);
+//    }
 
 }

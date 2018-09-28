@@ -23,9 +23,9 @@ class EventsApi extends AbstractApi {
 
     protected $service;
 
-    public function __construct($registeredKeys, $dbparams, $tokenField = NULL)
+    public function __construct($dbparams)
     {
-        parent::__construct($registeredKeys, $tokenField);
+       
         $this->service = new EventsService(
                 new Connection($dbparams));
         $this->helper  = new AppHelper('UsersService', $dbparams);
@@ -33,7 +33,6 @@ class EventsApi extends AbstractApi {
 
     public function get(Request $request, Response $response)
     {
-       // var_dump($request->getFilterData()); die;
         if (method_exists($this->service, $request->getFilter()) && !empty($request->getFilterData())) {
             $filter = $request->getFilter();
             $result = [];
@@ -65,8 +64,8 @@ class EventsApi extends AbstractApi {
 
     public function put(Request $request, Response $response)
     {
-       $data = json_decode(file_get_contents('php://input'), true);
-        
+       $data = $request->getData();
+       
        $result =  $this->service->updateEvent($data['data'], $data['recursion']);
         
       
@@ -105,7 +104,7 @@ class EventsApi extends AbstractApi {
       
         $id = $request->getDataByKey(self::ID_FIELD) ?? 0;
         
-        $data = json_decode(file_get_contents('php://input'), true);
+        $data = $request->getData();
         
         $result = $this->service->removeEvent($id, $data['recursion']);
         
