@@ -40,7 +40,7 @@ class AuthApi extends AbstractApi {
             $response->setData(['success' => self::_TRUE,
                 'message' => 'succes Auth',
                 'admin' => $admin,
-                'id'=>$user->getid()]);
+                'id' => $user->getid()]);
             $response->setStatus(Request::STATUS_200);
         } else {
             $response->setData(['success' => self::_FALSE,
@@ -135,10 +135,9 @@ class AuthApi extends AbstractApi {
         $headers = null;
 
 
-        if(isset($_SERVER['REDIRECT_HTTP_AUTHORIZATION'])){
-                 $headers = trim($_SERVER['REDIRECT_HTTP_AUTHORIZATION']);
-         }
-        else if (isset($_SERVER['Authorization'])) {
+        if (isset($_SERVER['REDIRECT_HTTP_AUTHORIZATION'])) {
+            $headers = trim($_SERVER['REDIRECT_HTTP_AUTHORIZATION']);
+        } else if (isset($_SERVER['Authorization'])) {
             $headers = trim($_SERVER["Authorization"]);
         } else if (isset($_SERVER['HTTP_AUTHORIZATION'])) { //Nginx or fast CGI
             $headers = trim($_SERVER["HTTP_AUTHORIZATION"]);

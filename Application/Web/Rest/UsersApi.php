@@ -22,9 +22,8 @@ class UsersApi extends AbstractApi {
 
     protected $service;
 
-    public function __construct($registeredKeys, $dbparams, $tokenField = NULL)
+    public function __construct($dbparams)
     {
-        parent::__construct($registeredKeys, $tokenField);
         $this->service = new UsersService(
                 new Connection($dbparams));
     }
@@ -35,7 +34,7 @@ class UsersApi extends AbstractApi {
 
         if ($id > 0) {
             $result = $this->service->
-                    fetchById($id); 
+                    fetchById($id);
         } else {
 
             $result = [];
@@ -62,16 +61,16 @@ class UsersApi extends AbstractApi {
         $user = $this->service->fetchById($data['data']['id']);
         //var_dump($data); die;
         $obj = Users::arrayToEntity($data['data'], new Users());
-        if(isset($data['data']['password']) && !empty($data['data']['password'])){
+        if (isset($data['data']['password']) && !empty($data['data']['password'])) {
             $hash = $this->service->createHashPassword($data['data']['password']);
-        
+
             $obj->setPassword($hash);
-        }else{
+        } else {
             $obj->setPassword($user->getPassword());
         }
         if ($newCust = $this->service->save($obj)) {
             $response->setData(['success' => self::_TRUE,
-                                'message' => 'success updated']);
+                'message' => 'success updated']);
             $response->setStatus(Request::STATUS_200);
         } else {
             $response->setData([self::ERROR]);
@@ -83,10 +82,9 @@ class UsersApi extends AbstractApi {
     {
         $id = $request->getDataByKey(self::ID_FIELD) ?? 0;
         $reqData = $request->getData();
-                
-        $newUser = $this->service->createUser($reqData); 
-        
-       
+
+        $newUser = $this->service->createUser($reqData);
+
 
         if ($newUser['success'] && $this->service->save($newUser['item'])) {
             $response->setData(['success' => self::_TRUE,
@@ -94,22 +92,22 @@ class UsersApi extends AbstractApi {
             ]);
             $response->setStatus(Request::STATUS_200);
         } else {
-            $response->setData(['message' =>$newUser['message']]);
+            $response->setData(['message' => $newUser['message']]);
             $response->setStatus(Request::STATUS_200);
         }
     }
 
     public function delete(Request $request, Response $response)
     {
-        
+
         $id = $response->getData() ?? 0;
 
-        
-        
+
+
         $obj = $this->service->fetchById($id);
         if ($obj && $this->service->remove($obj)) {
             $response->setData(['success' => true,
-                                'message' => 'succes delete user',
+                'message' => 'succes delete user',
                 'id' => $id]);
             $response->setStatus(Request::STATUS_200);
         } else {

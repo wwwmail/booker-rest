@@ -1,17 +1,35 @@
 <?php
+
 // autoload classes 
+
 namespace Application\Autoload;
 
-class Loader
-{
+class Loader {
+
     const UNABLE_TO_LOAD = 'Unable to load class';
-    
+
+    /**
+     * @var array dirs for load classes.
+     */
     protected static $dirs = array();
+
+    /**
+     * @var integer check init start spl_autoload_register
+     */
     protected static $registered = 0;
+
+    /**
+     * @access public
+     */
     public function __construct(array $dirs = array())
     {
         self::init($dirs);
     }
+
+    /**
+     * Add dirs to init loader 
+     * @param string|arrray $dirs
+     */
     public static function addDirs($dirs)
     {
         if (is_array($dirs)) {
@@ -21,6 +39,10 @@ class Loader
         }
     }
 
+    /**
+     * Load classes use autoLoad
+     * @param arrray $dirs
+     */
     public static function init($dirs = array())
     {
         if ($dirs) {
@@ -31,18 +53,22 @@ class Loader
             self::$registered++;
         }
     }
+
+    /**
+     * Load file use loadFile
+     * @param class $class
+     * return true|false
+     */
     public static function autoLoad($class)
     {
         $success = FALSE;
         $fn = str_replace('\\', DIRECTORY_SEPARATOR, $class) . '.php';
-        //echo $fn; die;
         foreach (self::$dirs as $start) {
             $file = $start . DIRECTORY_SEPARATOR . $fn;
             if (self::loadFile($file)) {
                 $success = TRUE;
                 break;
             }
-            
         }
         if (!$success) {
             if (!self::loadFile(__DIR__ . DIRECTORY_SEPARATOR . $fn)) {
@@ -51,6 +77,12 @@ class Loader
         }
         return $success;
     }
+
+    /**
+     * check if file exist and include file
+     * @param string $file
+     * return true|false
+     */
     protected static function loadFile($file)
     {
         if (file_exists($file)) {
@@ -59,5 +91,5 @@ class Loader
         }
         return FALSE;
     }
+
 }
-    

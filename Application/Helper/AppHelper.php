@@ -19,6 +19,10 @@ class AppHelper {
         ;
     }
 
+    /**
+     * Get bearer token from headers
+     * @return string|null
+     */
     private function getBearerToken()
     {
         $headers = $this->getAuthorizationHeader();
@@ -31,9 +35,12 @@ class AppHelper {
         return null;
     }
 
+    /**
+     * Get authorization header
+     * @return string|null
+     */
     private function getAuthorizationHeader()
     {
-        //var_dump($_SERVER); die;
         $headers = null;
          if(isset($_SERVER['REDIRECT_HTTP_AUTHORIZATION'])){
                  $headers = trim($_SERVER['REDIRECT_HTTP_AUTHORIZATION']);
@@ -46,7 +53,6 @@ class AppHelper {
             $requestHeaders = apache_request_headers();
             // Server-side fix for bug in old Android versions (a nice side-effect of this fix means we don't care about capitalization for Authorization)
             $requestHeaders = array_combine(array_map('ucwords', array_keys($requestHeaders)), array_values($requestHeaders));
-            //print_r($requestHeaders);
             if (isset($requestHeaders['Authorization'])) {
                 $headers = trim($requestHeaders['Authorization']);
             }
@@ -54,70 +60,60 @@ class AppHelper {
         return $headers;
     }
 
+    /**
+     * Get authorization user
+     * @return array
+     */
     public function getAuthUser()
     {
         return $this->service->fetchByToken($this->getBearerToken());
     }
-
-    public function isAuth()
+    
+    /**
+     * Check if user is auth and is admin
+     * @return bool
+     */
+    public function isAuthAdmin()
     {
         $authToken = $this->getBearerToken();
-        //echo $authToken; die;
         $user = $this->service->fetchByToken($authToken);
 
-//        var_dump($authToken);
-//        var_dump($user); die;
-        if (!empty($user) && time() < strtotime($user->getExpire())) {
-            //echo 'good';
+        if (!empty($user) && time() < strtotime($user->getExpire()) && $user->isAdmin == 1) {
             return true;
         } else {
-            // echo 'bad';
             return false;
         }
     }
 
+    /**
+     * Check if user is auth
+     * @return bool
+     */
+    public function isAuth()
+    {
+        $authToken = $this->getBearerToken();
+        $user = $this->service->fetchByToken($authToken);
+
+        if (!empty($user) && time() < strtotime($user->getExpire())) {
+            return true;
+        } else {
+            return false;
+        }
+    }
+
+    /**
+     * Get id auth user
+     * @return int|false
+     */
     public function getAuthUserId()
     {
         $authToken = $this->getBearerToken();
-        //echo $authToken; die;
         $user = $this->service->fetchByToken($authToken);
-
         if ($user) {
             return $user->id;
         } else {
             return false;
         }
-    }
-
-    public function arrayDiffRecursive($firstArray, $secondArray, $reverseKey = false)
-    {
-        $oldKey = 'old';
-        $newKey = 'new';
-        if ($reverseKey) {
-            $oldKey = 'new';
-            $newKey = 'old';
-        }
-        $difference = [];
-        foreach ($firstArray as $firstKey => $firstValue) {
-            if (is_array($firstValue)) {
-                if (!array_key_exists($firstKey, $secondArray) || !is_array($secondArray[$firstKey])) {
-                    $difference[$oldKey][$firstKey] = $firstValue;
-                    $difference[$newKey][$firstKey] = '';
-                } else {
-                    $newDiff = $this->arrayDiffRecursive($firstValue, $secondArray[$firstKey], $reverseKey);
-                    if (!empty($newDiff)) {
-                        $difference[$oldKey][$firstKey] = $newDiff[$oldKey];
-                        $difference[$newKey][$firstKey] = $newDiff[$newKey];
-                    }
-                }
-            } else {
-                if (!array_key_exists($firstKey, $secondArray) || $secondArray[$firstKey] != $firstValue) {
-                    $difference[$oldKey][$firstKey] = $firstValue;
-                    $difference[$newKey][$firstKey] = $secondArray[$firstKey];
-                }
-            }
-        }
-        return $difference;
     }
 
 }

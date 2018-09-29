@@ -5,18 +5,34 @@ namespace Application\Entity;
 class Base {
 
     protected $id = 0;
+
+    /**
+     * @var array mapping from key  to column (values).
+     */
     protected $mapping = ['id' => 'id'];
 
+    /**
+     * Get id 
+     * @return int 
+     */
     public function getId(): int
     {
         return $this->id;
     }
 
+    /**
+     * Set id 
+     * @param $id int 
+     */
     public function setId($id)
     {
         $this->id = (int) $id;
     }
 
+    /**
+     * Set instanse object from data in array
+     * @return object|false 
+     */
     public static function arrayToEntity($data, Base $instance)
     {
         if ($data && is_array($data)) {
@@ -29,6 +45,10 @@ class Base {
         return FALSE;
     }
 
+    /**
+     * Set array from object
+     * @return array 
+     */
     public function entityToArray()
     {
         $data = array();
@@ -38,11 +58,5 @@ class Base {
         }
         return $data;
     }
-
-//    protected static function isMultiArray($arr)
-//    {
-//        rsort($arr);
-//        return isset($arr[0]) && is_array($arr[0]);
-//    }
 
 }

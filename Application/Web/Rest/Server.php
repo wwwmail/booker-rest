@@ -23,7 +23,7 @@ class Server {
         $getPost = $_REQUEST ?? array();
         $jsonData = json_decode(
                 file_get_contents('php://input'), true);
-    
+
         $jsonData = $jsonData ?? array();
         $request->setData(array_merge($getPost, $jsonData));
         $id = $request->getData()[$this->api::ID_FIELD] ?? NULL;
@@ -39,7 +39,7 @@ class Server {
                 break;
             case Request::METHOD_GET :
             default :
-            // return all if no params
+                // return all if no params
                 $this->api->get($request, $response);
         }
         $this->processResponse($response);

@@ -2,9 +2,8 @@
 
 namespace tests;
 
-abstract class TrunsactionFiendlyDatabaseTestCase extends  \PHPUnit_Extensions_Database_TestCase
+abstract class TrunsactionFiendlyDatabaseTestCase extends \PHPUnit_Extensions_Database_TestCase {
 
-{
     /**
      *      * Returns the database operation executed in test setup.
      *           * Return DeleteAll and Insert After this.
@@ -14,11 +13,12 @@ abstract class TrunsactionFiendlyDatabaseTestCase extends  \PHPUnit_Extensions_D
     protected function getSetUpOperation()
     {
         return new \PHPUnit_Extensions_Database_Operation_Composite(
-            array
+                array
             (
-                \PHPUnit_Extensions_Database_Operation_Factory::DELETE_ALL(),
-                \PHPUnit_Extensions_Database_Operation_Factory::INSERT()
-            )
+            \PHPUnit_Extensions_Database_Operation_Factory::DELETE_ALL(),
+            \PHPUnit_Extensions_Database_Operation_Factory::INSERT()
+                )
         );
     }
+
 }

@@ -21,6 +21,10 @@ class Response extends AbstractHttp {
         }
     }
 
+    /**
+     * Set content type 
+     * @param string $contentType
+     */
     protected function processHeaders($contentType)
     {
         if (!$contentType) {
@@ -30,11 +34,19 @@ class Response extends AbstractHttp {
         }
     }
 
+    /**
+     * Set answer status 
+     * @param int $status
+     */
     public function setStatus($status)
     {
         $this->status = $status;
     }
 
+    /**
+     * Get answer status 
+     * @return int
+     */
     public function getStatus()
     {
         return $this->status;
