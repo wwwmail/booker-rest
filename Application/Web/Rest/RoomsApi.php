@@ -13,7 +13,8 @@ use Application\Database\{
 };
 use Application\Helper\{
     Filter,
-    AppHelper
+    AppHelper,
+    Text
 };
 
 class RoomsApi extends AbstractApi {
@@ -77,7 +78,8 @@ class RoomsApi extends AbstractApi {
             $data = $request->getData();
             $obj = Rooms::arrayToEntity($data['data'], new Rooms());
             if ($this->service->save($obj)) {
-                $response->setData(['success' => self::_TRUE, 'message' => 'update successfuly']);
+                $response->setData(['success' => self::_TRUE, 
+                                    'message' => Text::t('success_updated')]);
                 $response->setStatus(Request::STATUS_200);
             } else {
                 $response->setData([self::ERROR]);
@@ -96,28 +98,34 @@ class RoomsApi extends AbstractApi {
      */
     public function post(Request $request, Response $response)
     {
-        $id = $request->getDataByKey(self::ID_FIELD) ?? 0;
-        $reqData = $request->getData();
+        
+        if ($this->helper->isAuthAdmin()) {
+            $id = $request->getDataByKey(self::ID_FIELD) ?? 0;
+            $reqData = $request->getData();
 
-        $filter = Filter::check($reqData, array(
-                    'name' => ['required' => true,],
-        ));
+            $filter = Filter::check($reqData, array(
+                        'name' => ['required' => true,],
+            ));
 
-        if ($filter->passed()) {
+            if ($filter->passed()) {
 
-            $obj = Rooms::arrayToEntity($reqData, new Rooms());
+                $obj = Rooms::arrayToEntity($reqData, new Rooms());
 
-            if ($obj && $this->service->save($obj)) {
-                $response->setData(['success' => self::_TRUE,
-                    'message' => 'created new room']);
-                $response->setStatus(Request::STATUS_200);
+                if ($obj && $this->service->save($obj)) {
+                    $response->setData(['success' => self::_TRUE,
+                        'message' => Text::t('created_room')]);
+                    $response->setStatus(Request::STATUS_200);
+                } else {
+                    $response->setData([self::ERROR_NOT_FOUND]);
+                    $response->setStatus(Request::STATUS_500);
+                }
             } else {
-                $response->setData([self::ERROR_NOT_FOUND]);
-                $response->setStatus(Request::STATUS_500);
+                $response->setData(['success' => self::_FALSE,
+                    'message' => $filter->errors()]);
             }
         } else {
-            $response->setData(['success' => self::_FALSE,
-                'message' => $filter->errors()]);
+            $response->setData([self::ERROR]);
+            $response->setStatus(Request::STATUS_401);
         }
     }
 
@@ -128,25 +136,30 @@ class RoomsApi extends AbstractApi {
      */
     public function delete(Request $request, Response $response)
     {
-        $id = $response->getData() ?? 0;
-        $check = $this->service->checkEventsExist($id);
-        
-        if (!$check) {
-            $obj = $this->service->fetchByIdAdmin($id);
-           
-            $obj->setIsActive(0);
-            if ($obj && $this->service->save($obj)) {
-                $response->setData(['success' => self::_TRUE,
-                    'id' => $id]);
-                $response->setStatus(Request::STATUS_200);
+        if ($this->helper->isAuthAdmin()) {
+            $id = $response->getData() ?? 0;
+            $check = $this->service->checkEventsExist($id);
+
+            if (!$check) {
+                $obj = $this->service->fetchByIdAdmin($id);
+
+                $obj->setIsActive(0);
+                if ($obj && $this->service->save($obj)) {
+                    $response->setData(['success' => self::_TRUE,
+                        'id' => $id]);
+                    $response->setStatus(Request::STATUS_200);
+                } else {
+                    $response->setData([self::ERROR_NOT_FOUND]);
+                    $response->setStatus(Request::STATUS_500);
+                }
             } else {
-                $response->setData([self::ERROR_NOT_FOUND]);
-                $response->setStatus(Request::STATUS_500);
+                $response->setData(['success' => self::_FALSE,
+                    'message' => Text::t('room_has_events')]);
+                $response->setStatus(Request::STATUS_200);
             }
         } else {
-            $response->setData(['success' => self::_FALSE,
-                'message' => 'this room has events']);
-            $response->setStatus(Request::STATUS_200);
+            $response->setData([self::ERROR]);
+            $response->setStatus(Request::STATUS_401);
         }
     }
 

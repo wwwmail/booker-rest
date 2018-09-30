@@ -2,6 +2,7 @@
 
 namespace Application\Helper;
 
+use Application\Helper\Text;
 class Filter {
 
     protected static $instance = null;
@@ -78,7 +79,7 @@ class Filter {
     public function filter_required($value, $rule_value, $item)
     {
         if (empty($value)) {
-            $this->add_error("{$item} is required.");
+            $this->add_error("{$item} ". Text::t('is_required'));
         }
     }
 
@@ -88,7 +89,7 @@ class Filter {
     public function filter_length_min($value, $rule_value, $item)
     {
         if (strlen($value) < $rule_value) {
-            $this->add_error("{$item} must contain minimum {$rule_value} characters");
+            $this->add_error("{$item} ".Text::t('must_minimum')." {$rule_value} ".Text::t('characters'));
         }
     }
 
@@ -98,7 +99,7 @@ class Filter {
     public function filter_length_max($value, $rule_value, $item)
     {
         if (strlen($value) > $rule_value) {
-            $this->add_error("{$item} can't contain more than {$rule_value} characters");
+            $this->add_error("{$item} ".Text::t('cant_more')." {$rule_value} ".Text::t('characters'));
         }
     }
 
@@ -108,7 +109,7 @@ class Filter {
     public function filter_email($value, $rule_value, $item)
     {
         if (!filter_var($value, FILTER_VALIDATE_EMAIL)) {
-            $this->add_error("{$value} is not a valid email address");
+            $this->add_error("{$value} " .Text::t('is_not_valid_email')); 
         }
     }
 
@@ -118,7 +119,7 @@ class Filter {
     public function filter_numeric($value, $rule_value, $item)
     {
         if (!ctype_digit($value)) {
-            $this->add_error("{$item} contains illegal characters. Only numbers 0-9");
+            $this->add_error("{$item} " .Text::t('numeric_only'));
         }
     }
 
@@ -128,7 +129,7 @@ class Filter {
     public function filter_zirrow_one($value, $rule_value, $item)
     {
         if (!ctype_digit($value) || ($value != '0' && $value != '1')) {
-            $this->add_error("{$item} Only numbers 0 or 1");
+            $this->add_error("{$item} " .Text::t('0_1_only'));
         }
     }
 
@@ -138,7 +139,7 @@ class Filter {
     public function filter_date($value, $rule_value, $item)
     {
         if (strtotime($value) < strtotime($rule_value)) {
-            $this->add_error("{$item} can't less then {$rule_value}");
+            $this->add_error("{$item} " .Text::t('cant_less'). " {$rule_value}");
         }
     }
 
@@ -148,7 +149,7 @@ class Filter {
     public function filter_in_array($value, $rule_value, $item)
     {
         if (in_array($value, $rule_value)) {
-            $this->add_error("{$item} can use this type {$rule_value}");
+            $this->add_error("{$item} " .Text::t('cant_use_type'). "  {$rule_value}");
         }
     }
 
@@ -159,7 +160,7 @@ class Filter {
     {
         $hour = date("H", strtotime($value));
         if ($hour < 8 || $hour > 20) {
-            $this->add_error("{$item} can't be less then 8 AM and more then 8 PM");
+            $this->add_error("{$item} " .Text::t('hour_limit'));
         }
     }
 
@@ -178,7 +179,7 @@ class Filter {
 
 
         if ($difference < 30) {
-            $this->add_error("{$item} can't be less then 30 from start time");
+            $this->add_error("{$item} " .Text::t('diference_time_limit'));
         }
     }
 
@@ -191,17 +192,17 @@ class Filter {
         switch ($rule_value) {
             case 'weekly':
                 if (!in_array($value, [1, 2, 3, 4])) {
-                    $this->add_error("{$rule_value} can be 1, 2, 3, or 4");
+                    $this->add_error("{$rule_value} ".Text::t('1_2_3_4'));
                 }
                 break;
             case 'bi-weekly':
                 if (!in_array($value, [1, 2])) {
-                    $this->add_error("{$rule_value} can be 1 or 2");
+                    $this->add_error("{$rule_value} ".Text::t('1_2'));
                 }
                 break;
             case 'monthly':
                 if (!in_array($value, [1, 2])) {
-                    $this->add_error("{$rule_value} can be 1");
+                    $this->add_error("{$rule_value} ".Text::t('_1_'));
                 }
                 break;
         }

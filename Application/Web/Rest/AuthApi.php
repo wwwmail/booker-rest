@@ -10,13 +10,14 @@ use Application\Database\{
     Connection,
     UsersService
 };
+use Application\Helper\Text;
 
 class AuthApi extends AbstractApi {
 
     const ERROR = 'ERROR';
     const ERROR_NOT_FOUND = 'ERROR: Not Found';
     const _TRUE = 'true';
-    const _FALSE = 'false';
+    const _FALSE = 'false'  ;
     const ID_FIELD = 'id';
 
     protected $service;
@@ -43,13 +44,13 @@ class AuthApi extends AbstractApi {
                 $admin = false;
             }
             $response->setData(['success' => self::_TRUE,
-                'message' => 'succes Auth',
+                'message' => Text::t('success_auth'),
                 'admin' => $admin,
                 'id' => $user->getid()]);
             $response->setStatus(Request::STATUS_200);
         } else {
             $response->setData(['success' => self::_FALSE,
-                'message' => 'false Auth']);
+                'message' => Text::t('bad_auth')]);
             $response->setStatus(Request::STATUS_200);
         }
     }
@@ -70,7 +71,7 @@ class AuthApi extends AbstractApi {
 
         if ($this->service->save($user)) {
             $response->setData(['success' => self::_TRUE,
-                'message' => 'succes logout'
+                'message' => Text::t('success_logout'),
             ]);
             $response->setStatus(Request::STATUS_200);
         } else {
@@ -103,7 +104,7 @@ class AuthApi extends AbstractApi {
             if ($this->service->save($user)) {
                 $response->setData(['success' => self::_TRUE,
                     'auth' => $token,
-                    'message' => 'succes logining'
+                    'message' => Text::t('succes_logining'),
                 ]);
                 $response->setStatus(Request::STATUS_200);
             } else {
@@ -112,7 +113,7 @@ class AuthApi extends AbstractApi {
             }
         } else {
             $response->setData([self::ERROR,
-                'message' => 'email or pass is incorect'
+                'message' => Text::t('false_logining'),
             ]);
             $response->setStatus(Request::STATUS_500);
         }

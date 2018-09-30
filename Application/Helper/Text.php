@@ -13,7 +13,7 @@ class Text{
      * @param type $string
      * @return string
      */
-    public static function get($string)
+    public static function t($string)
     {
 
         if (self::$flag == 0) {

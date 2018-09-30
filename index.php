@@ -20,11 +20,6 @@ use Application\App;
 
 use Application\Helper\Text;
 
-$a = Text::get('test');
-echo $a;
-die;
-
-
 $obj = new App($dbParams);
 
 

@@ -11,17 +11,18 @@ use Application\Database\{
     Connection,
     UsersService
 };
-use Application\Helper\AppHelper;
+use Application\Helper\{AppHelper, Text};
 
 class UsersApi extends AbstractApi {
 
     const ERROR = 'ERROR';
     const ERROR_NOT_FOUND = 'ERROR: Not Found';
-    const _TRUE = 'true';
-    const _FALSE = 'false';
+    const _TRUE = true;
+    const _FALSE = false;
     const ID_FIELD = 'id'; // field name of primary key
 
     protected $service;
+    protected $helper;
 
     public function __construct($dbparams)
     {
@@ -61,44 +62,54 @@ class UsersApi extends AbstractApi {
 
     public function put(Request $request, Response $response)
     {
-        $data = $request->getData();
+        if ($this->helper->isAuthAdmin()) {
+            $data = $request->getData();
 
-        $user = $this->service->fetchByIdAdmin($data['data']['id']);
-       
-        $obj = Users::arrayToEntity($data['data'], new Users());
-        if (isset($data['data']['password']) && !empty($data['data']['password'])) {
-            $hash = $this->service->createHashPassword($data['data']['password']);
+            $user = $this->service->fetchByIdAdmin($data['data']['id']);
 
-            $obj->setPassword($hash);
-        } else {
-            $obj->setPassword($user->getPassword());
-        }
-        if ($newCust = $this->service->save($obj)) {
-            $response->setData(['success' => self::_TRUE,
-                'message' => 'success updated']);
-            $response->setStatus(Request::STATUS_200);
+            $obj = Users::arrayToEntity($data['data'], new Users());
+            if (isset($data['data']['password']) && !empty($data['data']['password'])) {
+                $hash = $this->service->createHashPassword($data['data']['password']);
+
+                $obj->setPassword($hash);
+            } else {
+                $obj->setPassword($user->getPassword());
+            }
+            if ($newCust = $this->service->save($obj)) {
+                $response->setData(['success' => self::_TRUE,
+                    'message' => Text::t('success_updated')]);
+                $response->setStatus(Request::STATUS_200);
+            } else {
+                $response->setData([self::ERROR]);
+                $response->setStatus(Request::STATUS_200);
+            }
         } else {
             $response->setData([self::ERROR]);
-            $response->setStatus(Request::STATUS_200);
+            $response->setStatus(Request::STATUS_401);
         }
     }
 
     public function post(Request $request, Response $response)
     {
-        $id = $request->getDataByKey(self::ID_FIELD) ?? 0;
-        $reqData = $request->getData();
+        if ($this->helper->isAuthAdmin()) {
+            $id = $request->getDataByKey(self::ID_FIELD) ?? 0;
+            $reqData = $request->getData();
 
-        $newUser = $this->service->createUser($reqData);
+            $newUser = $this->service->createUser($reqData);
 
 
-        if ($newUser['success'] && $this->service->save($newUser['item'])) {
-            $response->setData(['success' => self::_TRUE,
-                'message' => 'user created successfully'
-            ]);
-            $response->setStatus(Request::STATUS_200);
+            if ($newUser['success'] && $this->service->save($newUser['item'])) {
+                $response->setData(['success' => self::_TRUE,
+                    'message' => Text::t('success_create_user')
+                ]);
+                $response->setStatus(Request::STATUS_200);
+            } else {
+                $response->setData(['message' => $newUser['message']]);
+                $response->setStatus(Request::STATUS_200);
+            }
         } else {
-            $response->setData(['message' => $newUser['message']]);
-            $response->setStatus(Request::STATUS_200);
+            $response->setData([self::ERROR]);
+            $response->setStatus(Request::STATUS_401);
         }
     }
 
@@ -115,7 +126,7 @@ class UsersApi extends AbstractApi {
         $obj->setIsActive(0);
         if ($obj && $this->service->save($obj)) {
             $response->setData(['success' => true,
-                'message' => 'succes delete user',
+                'message' => Text::t('success_delete_user'),
                 'id' => $id]);
             $response->setStatus(Request::STATUS_200);
         } else {
@@ -125,7 +136,7 @@ class UsersApi extends AbstractApi {
         
         }else{
             $response->setData(['success' => true,
-                'message' => 'user have active events',
+                'message' => Text::t('user_has_events'),
                 'id' => $id]);
             $response->setStatus(Request::STATUS_200);
         }

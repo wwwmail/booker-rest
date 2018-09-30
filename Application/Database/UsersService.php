@@ -5,6 +5,7 @@ namespace Application\Database;
 use Application\Entity\Users;
 use PDO;
 
+use Application\Helper\Text;
 class UsersService {
 
     protected $connection;
@@ -237,7 +238,7 @@ class UsersService {
             $info = [
                 'success' => false,
                 'item' => false,
-                'message' => 'user_exist'
+                'message' => Text::t('user_exist')
             ];
             return $info;
         }

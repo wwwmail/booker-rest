@@ -11,14 +11,14 @@ use Application\Database\{
     Connection,
     EventsService
 };
-use Application\Helper\AppHelper;
+use Application\Helper\{AppHelper, Text};
 
 class EventsApi extends AbstractApi {
 
     const ERROR = 'ERROR';
     const ERROR_NOT_FOUND = 'ERROR: Not Found';
-    const _TRUE = 'true';
-    const _FALSE = 'false';
+    const _TRUE = true;
+    const _FALSE = false;
     const ID_FIELD = 'id'; // field name of primary key
 
     protected $service;
@@ -70,7 +70,8 @@ class EventsApi extends AbstractApi {
 
 
         if ($result === true) {
-            $response->setData(['success' => self::_TRUE, 'message' => 'success updated']);
+            $response->setData(['success' => self::_TRUE, 
+                                'message' => Text::t('success_updated')]);
             $response->setStatus(Request::STATUS_200);
         } else {
             $response->setData(['success' => self::_FALSE, 'message' => $result]);
@@ -89,7 +90,7 @@ class EventsApi extends AbstractApi {
 
         if ($event === true) {
             $response->setData(['success' => self::_TRUE,
-                'message' => 'event created successfully'
+                'message' => Text::t('success_created')
             ]);
             $response->setStatus(Request::STATUS_200);
         } else {
@@ -111,7 +112,7 @@ class EventsApi extends AbstractApi {
 
         if ($result === true) {
             $response->setData(['success' => self::_TRUE,
-                'message' => 'event delete successfully'
+                'message' => Text::t('success_delete_event')
             ]);
             $response->setStatus(Request::STATUS_200);
         } else {

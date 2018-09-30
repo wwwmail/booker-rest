@@ -5,6 +5,7 @@ namespace Application\Database;
 use Application\Helper\Filter;
 use Application\Entity\Events;
 use PDO;
+use Application\Helper\Text;
 
 class EventsService {
 
@@ -52,7 +53,8 @@ class EventsService {
     public function fetchAll()
     {
         $stmt = $this->connection->pdo
-                ->prepare(Finder::getSql('SELECT * FROM app_events ORDER BY starttime'));
+                ->prepare(Finder::getSql('SELECT * FROM app_events '
+                                        . 'ORDER BY starttime'));
         $stmt->execute();
 
         while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
@@ -78,7 +80,7 @@ class EventsService {
      * @param array $data
      * @return bool
      */
-    public function createEvent(array $data)
+    public function createEventExec(array $data)
     {
          $sql = 'INSERT INTO app_events SET recursion = :recursion, '
                     . 'recursion_id = :recursion_id, user_id = :user_id,'
@@ -108,7 +110,7 @@ class EventsService {
     {
         $check = $this->checkAvaliableDate($data['starttime'], $data['endtime'], $data['room_id']);
         if (!$check) {
-            return $this->createEvent($data);
+            return $this->createEventExec($data);
         } else {
             $events = '';
             foreach ($check as $item) {
@@ -401,7 +403,6 @@ class EventsService {
         $starttime = date('Y-m-d H:i:s', strtotime($starttime . ' +1 minutes'));
         $endtime = date('Y-m-d H:i:s', strtotime($endtime . ' +1 minutes'));
         
-        //var_dump($id); die;
         $sql = "SELECT * FROM app_events WHERE ('$starttime' BETWEEN `starttime` AND `endtime` "
                 . "OR '$endtime' BETWEEN `starttime` AND `endtime` "
                 . "OR `starttime` BETWEEN '$starttime' AND '$endtime'"
@@ -456,7 +457,10 @@ class EventsService {
     public function updateSimpleEvent(array $data)
     {
         $check = $this->checkAvaliableDateForUpdate(
-                date('Y-m-d H:i:s', strtotime($data['starttime'])), date('Y-m-d H:i:s', strtotime($data['endtime'])), $data['room_id'], $data['id']);
+                date('Y-m-d H:i:s', strtotime($data['starttime'])), 
+                date('Y-m-d H:i:s', strtotime($data['endtime'])), 
+                $data['room_id'], 
+                $data['id']);
         
         $events = 'events exist ';
         foreach ($check as $item) {
