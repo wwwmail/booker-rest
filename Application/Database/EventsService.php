@@ -73,17 +73,14 @@ class EventsService {
         $stmt->execute(['id' => (int) $id]);
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
-
     /**
-     * Create event 
+     * Create event
      * @param array $data
-     * return true|string
+     * @return bool
      */
-    public function creatSimpleEvent(array $data)
+    public function createEvent(array $data)
     {
-        $check = $this->checkAvaliableDate($data['starttime'], $data['endtime'], $data['room_id']);
-        if (!$check) {
-            $sql = 'INSERT INTO app_events SET recursion = :recursion, '
+         $sql = 'INSERT INTO app_events SET recursion = :recursion, '
                     . 'recursion_id = :recursion_id, user_id = :user_id,'
                     . 'room_id = :room_id, description = :description,'
                     . 'date = :date, starttime = :starttime,'
@@ -100,6 +97,18 @@ class EventsService {
                         'starttime' => date('Y-m-d H:i:s', strtotime($data['starttime'])),
                         'endtime' => date('Y-m-d H:i:s', strtotime($data['endtime'])),
             ]);
+    }
+
+    /**
+     * Create event 
+     * @param array $data
+     * return true|string
+     */
+    public function creatSimpleEvent(array $data)
+    {
+        $check = $this->checkAvaliableDate($data['starttime'], $data['endtime'], $data['room_id']);
+        if (!$check) {
+            return $this->createEvent($data);
         } else {
             $events = '';
             foreach ($check as $item) {
