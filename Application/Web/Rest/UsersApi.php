@@ -11,6 +11,7 @@ use Application\Database\{
     Connection,
     UsersService
 };
+use Application\Helper\AppHelper;
 
 class UsersApi extends AbstractApi {
 
@@ -26,6 +27,7 @@ class UsersApi extends AbstractApi {
     {
         $this->service = new UsersService(
                 new Connection($dbparams));
+        $this->helper = new AppHelper('UsersService', $dbparams);
     }
 
     public function get(Request $request, Response $response)
@@ -33,13 +35,16 @@ class UsersApi extends AbstractApi {
         $id = $response->getData() ?? 0;
 
         if ($id > 0) {
-            $result = $this->service->
-                    fetchById($id);
+           $result = $this->helper->isAuthAdmin() 
+                    ? $this->service->fetchByIdAdmin($id) 
+                    : $this->service->fetchById($id);
         } else {
 
             $result = [];
 
-            $fetch = $this->service->fetchAll();
+             $fetch = $this->helper->isAuthAdmin() 
+                    ?  $this->service->fetchAllAdmin()
+                    : $this->service->fetchAll();
 
             foreach ($fetch as $row) {
                 $result[] = $row;
@@ -50,7 +55,7 @@ class UsersApi extends AbstractApi {
             $response->setStatus(Request::STATUS_200);
         } else {
             $response->setData([self::ERROR_NOT_FOUND]);
-            $response->setStatus(Request::STATUS_500);
+            $response->setStatus(Request::STATUS_200);
         }
     }
 
@@ -58,8 +63,8 @@ class UsersApi extends AbstractApi {
     {
         $data = $request->getData();
 
-        $user = $this->service->fetchById($data['data']['id']);
-        //var_dump($data); die;
+        $user = $this->service->fetchByIdAdmin($data['data']['id']);
+       
         $obj = Users::arrayToEntity($data['data'], new Users());
         if (isset($data['data']['password']) && !empty($data['data']['password'])) {
             $hash = $this->service->createHashPassword($data['data']['password']);
@@ -103,9 +108,12 @@ class UsersApi extends AbstractApi {
         $id = $response->getData() ?? 0;
 
 
-
-        $obj = $this->service->fetchById($id);
-        if ($obj && $this->service->remove($obj)) {
+        $check = $this->service->checkUsersEvent($id);
+        if(!$check){
+        $obj = $this->service->fetchByIdAdmin($id);
+        
+        $obj->setIsActive(0);
+        if ($obj && $this->service->save($obj)) {
             $response->setData(['success' => true,
                 'message' => 'succes delete user',
                 'id' => $id]);
@@ -113,6 +121,13 @@ class UsersApi extends AbstractApi {
         } else {
             $response->setData([self::ERROR_NOT_FOUND]);
             $response->setStatus(Request::STATUS_500);
+        }
+        
+        }else{
+            $response->setData(['success' => true,
+                'message' => 'user have active events',
+                'id' => $id]);
+            $response->setStatus(Request::STATUS_200);
         }
     }
 

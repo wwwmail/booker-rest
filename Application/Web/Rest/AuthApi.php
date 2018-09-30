@@ -27,6 +27,11 @@ class AuthApi extends AbstractApi {
                 new Connection($dbparams));
     }
 
+    /**
+     * Get auth user information
+     * @param Request $request
+     * @param Response $response
+     */
     public function get(Request $request, Response $response)
     {
         if ($this->isAuth() == true) {
@@ -49,6 +54,11 @@ class AuthApi extends AbstractApi {
         }
     }
 
+    /**
+     * Logout user
+     * @param Request $request
+     * @param Response $response
+     */
     public function put(Request $request, Response $response)
     {
         $user = $this->getAuthUser();
@@ -69,6 +79,11 @@ class AuthApi extends AbstractApi {
         }
     }
 
+    /**
+     * Login user
+     * @param Request $request
+     * @param Response $response
+     */
     public function post(Request $request, Response $response)
     {
         $reqData = $request->getData();
@@ -103,20 +118,20 @@ class AuthApi extends AbstractApi {
         }
     }
 
+    /**
+     * Not Allowed
+     * @param Request $request
+     * @param Response $response
+     */
     public function delete(Request $request, Response $response)
     {
-        $id = $request->getDataByKey(self::ID_FIELD) ?? 0;
-        $cust = $this->service->fetchById($id);
-        if ($cust && $this->service->remove($cust)) {
-            $response->setData(['success' => self::SUCCESS_DELETE,
-                'id' => $id]);
-            $response->setStatus(Request::STATUS_200);
-        } else {
-            $response->setData([self::ERROR_NOT_FOUND]);
-            $response->setStatus(Request::STATUS_500);
-        }
+            $response->setStatus(Request::STATUS_405);  
     }
 
+    /**
+     * Get bearer token from headers
+     * @return string|null
+     */
     private function getBearerToken()
     {
         $headers = $this->getAuthorizationHeader();
@@ -129,11 +144,13 @@ class AuthApi extends AbstractApi {
         return null;
     }
 
+    /**
+     * Get auth headers
+     * @return string|null
+     */
     private function getAuthorizationHeader()
     {
-        //var_dump($_SERVER); die;
         $headers = null;
-
 
         if (isset($_SERVER['REDIRECT_HTTP_AUTHORIZATION'])) {
             $headers = trim($_SERVER['REDIRECT_HTTP_AUTHORIZATION']);
@@ -153,11 +170,19 @@ class AuthApi extends AbstractApi {
         return $headers;
     }
 
+    /**
+     * Get auth user
+     * @return array|false
+     */
     public function getAuthUser()
     {
         return $this->service->fetchByToken($this->getBearerToken());
     }
 
+    /**
+     * Check is auth
+     * @return boolean
+     */
     public function isAuth()
     {
         $authToken = $this->getBearerToken();

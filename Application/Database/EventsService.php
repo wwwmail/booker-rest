@@ -52,7 +52,7 @@ class EventsService {
     public function fetchAll()
     {
         $stmt = $this->connection->pdo
-                ->prepare(Finder::select('app_events')::getSql());
+                ->prepare(Finder::getSql('SELECT * FROM app_events ORDER BY starttime'));
         $stmt->execute();
 
         while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
@@ -103,7 +103,7 @@ class EventsService {
         } else {
             $events = '';
             foreach ($check as $item) {
-                $events .= "from {$item['starttime']} - to {$item['endtime']}";
+                $events .= " from {$item['starttime']} - to {$item['endtime']}";
             }
             return "event exixt  {$events}";
         }
@@ -115,7 +115,7 @@ class EventsService {
      * @param array $data
      * return bool
      */
-    public function creatRecursionEvent(string $recursion_type, array $data)
+    public function creatRecursionEvent($recursion_type, array $data)
     {
         switch ($recursion_type) {
             case 'weekly':
@@ -177,7 +177,7 @@ class EventsService {
                     $success = true;
                 } else {
                     foreach ($check as $item) {
-                        $events .= "from {$item['starttime']} - to {$item['endtime']} ";
+                        $events .= " from {$item['starttime']} - to {$item['endtime']} ";
                     }
                     $flag = false;
                 }
@@ -242,7 +242,7 @@ class EventsService {
                     $success = true;
                 } else {
                     foreach ($check as $item) {
-                        $events .= "from {$item['starttime']} - to {$item['endtime']} ";
+                        $events .= " from {$item['starttime']} - to {$item['endtime']} ";
                     }
                     $flag = false;
                 }
@@ -307,7 +307,7 @@ class EventsService {
                     $success = true;
                 } else {
                     foreach ($check as $item) {
-                        $events .= "from {$item['starttime']} - to {$item['endtime']} ";
+                        $events .= " from {$item['starttime']} - to {$item['endtime']} ";
                     }
                     $flag = false;
                 }
@@ -378,6 +378,31 @@ class EventsService {
         $stmt->execute();
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
+    
+    
+    /**
+     * Check if can add event to room
+     * @param string $starttime
+     * @param string $endtime
+     * @param int $id 
+     * return array
+     */
+    private function checkAvaliableDateForUpdate($starttime, $endtime, $room_id, $id)
+    {
+        $starttime = date('Y-m-d H:i:s', strtotime($starttime . ' +1 minutes'));
+        $endtime = date('Y-m-d H:i:s', strtotime($endtime . ' +1 minutes'));
+        
+        //var_dump($id); die;
+        $sql = "SELECT * FROM app_events WHERE ('$starttime' BETWEEN `starttime` AND `endtime` "
+                . "OR '$endtime' BETWEEN `starttime` AND `endtime` "
+                . "OR `starttime` BETWEEN '$starttime' AND '$endtime'"
+                . "OR `endtime` BETWEEN '$starttime' AND '$endtime') "
+                . " AND room_id = '$room_id' AND  id <> '$id' AND recursion_id <> '$id'";
+        $stmt = $this->connection->pdo->prepare($sql);
+
+        $stmt->execute();
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+    }
 
     /**
      * Filter data and update event simple or recursive
@@ -398,6 +423,8 @@ class EventsService {
                     'starttime' => ['required' => true, 'date' => date("Y-m-d G:i"), 'hour' => true],
                     'endtime' => ['required' => true, 'date' => $data['starttime'], 'hour' => true],
         ));
+        
+        //var_dump($data); die;
 
 
         if ($filter->passed()) {
@@ -405,7 +432,7 @@ class EventsService {
             if ($recursion != '1') {
                 return $this->updateSimpleEvent($data);
             } else {
-                return $this->updateRecursionEvent($data);
+                return $this->updateRecursionEvent($data, $data['newStartTime'], $data['newEndTime']);
             }
         } else {
             return $filter->errors();
@@ -419,8 +446,9 @@ class EventsService {
      */
     public function updateSimpleEvent(array $data)
     {
-        $check = $this->checkAvaliableDate(
-                date('Y-m-d H:i:s', strtotime($data['starttime'])), date('Y-m-d H:i:s', strtotime($data['endtime'])), $data['room_id']);
+        $check = $this->checkAvaliableDateForUpdate(
+                date('Y-m-d H:i:s', strtotime($data['starttime'])), date('Y-m-d H:i:s', strtotime($data['endtime'])), $data['room_id'], $data['id']);
+        
         $events = 'events exist ';
         foreach ($check as $item) {
             $events .= "from {$item['starttime']} - to {$item['endtime']} ";
@@ -492,24 +520,62 @@ class EventsService {
         }
     }
 
+    public function getRecursionEvents($id)
+    {
+        $sql = "SELECT * FROM app_events WHERE id = '$id' OR recursion_id = '$id'";
+        $stmt = $this->connection->pdo->prepare($sql);
+        $stmt->execute();
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+    }
+
     /**
      * Update recursion event only time
      * @param array $data
      * return bool
      */
-    public function updateRecursionEvent(array $data)
+    public function updateRecursionEvent(array $data, $newStartTime, $newEndTime)
     {
-        //  var_dump($data); die;
-//      var_dump($data['starttime']); die;
-        $sql = "UPDATE app_events SET description = ?, "
-                . "starttime = DATE_FORMAT(starttime, '%Y-%m-%d {$data['newStartTime']}:%s'),"
-                . "endtime = DATE_FORMAT(endtime, '%Y-%m-%d {$data['newEndTime']}:%s')"
-                . " WHERE id = ?   "
-                . "OR  (recursion_id = ?  AND starttime >= ?) "
-                . "OR (recursion_id = ? AND starttime >= ?) ";
+        $success = true;
+        $eventsMessage = 'event exist ';
+        $eventsExist = array();
+        $events = $this->getRecursionEvents($data['id']);
 
-        $stmt = $this->connection->pdo->prepare($sql);
-        return $stmt->execute([$data['description'], $data['id'], $data['recursion_id'], $data['starttime'], $data['id'], $data['starttime']]);
+        foreach ($events as $recEvent) {
+            $starttime = date('Y-m-d H:i:s', strtotime($recEvent['date'] . ' ' . $newStartTime));
+            $endtime = date('Y-m-d H:i:s', strtotime($data['date'] . ' ' . $newEndTime));
+
+
+            $check = $this->checkAvaliableDateForUpdate(
+                    $starttime, $endtime, $data['room_id'], $data['id']);
+
+            if ($check) {
+
+
+                $success = FALSE;
+                foreach ($check as $item) {
+
+                    $eventsMessage .= " from {$item['starttime']} - to {$item['endtime']} ";
+                }
+            }
+        }
+
+        $newStartTime = date('H:i:s', strtotime($newStartTime));
+        $newEndTime = date('H:i:s', strtotime($newEndTime));
+
+        if ($success) {
+
+            $sql = "UPDATE app_events SET description = ?, "
+                    . "starttime = DATE_FORMAT(starttime, '%Y-%m-%d {$newStartTime}:%s'),"
+                    . "endtime = DATE_FORMAT(endtime, '%Y-%m-%d {$newEndTime}:%s')"
+                    . " WHERE id = ?   "
+                    . "OR  (recursion_id = ?  AND starttime >= ?) "
+                    . "OR (recursion_id = ? AND starttime >= ?) ";
+
+            $stmt = $this->connection->pdo->prepare($sql);
+            return $stmt->execute([$data['description'], $data['id'], $data['recursion_id'], $data['starttime'], $data['id'], $data['starttime']]);
+        } else {
+            return $eventsMessage;
+        }
     }
 
     /**

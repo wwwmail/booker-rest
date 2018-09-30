@@ -22,9 +22,25 @@ class RoomsService {
      */
     public function fetchById($id)
     {
+        
         $stmt = $this->connection->pdo
-                ->prepare(Finder::select('app_rooms')
-                ->where('id = :id')::getSql());
+                ->prepare(Finder::getSql("SELECT * FROM app_rooms WHERE id = :id "
+                        . "AND is_active = 1"));
+        $stmt->execute(['id' => (int) $id]);
+        return Rooms::arrayToEntity(
+                        $stmt->fetch(PDO::FETCH_ASSOC), new Rooms());
+    }
+    
+    /**
+     * Get room by id for admin
+     * @param int $id
+     * return object
+     */
+    public function fetchByIdAdmin($id)
+    {
+        
+        $stmt = $this->connection->pdo
+                ->prepare(Finder::getSql("SELECT * FROM app_rooms WHERE id = :id"));
         $stmt->execute(['id' => (int) $id]);
         return Rooms::arrayToEntity(
                         $stmt->fetch(PDO::FETCH_ASSOC), new Rooms());
@@ -40,7 +56,7 @@ class RoomsService {
         $stmt = $this->connection->pdo
                 ->prepare(Finder::select('app_events')
                 ->where('starttime > :starttime')
-                ->and('room_id = :room_id')::getSql());
+                ->andS('room_id = :room_id')::getSql());
         $stmt->execute(['starttime' => date('Y-m-d H:i:s'), 'room_id' => (int) $room_id]);
         return $stmt->fetch(PDO::FETCH_ASSOC);
     }
@@ -51,7 +67,22 @@ class RoomsService {
     public function fetchAll()
     {
         $stmt = $this->connection->pdo
-                ->prepare(Finder::select('app_rooms')::getSql());
+                ->prepare(Finder::select('app_rooms')->where('is_active = 1')::getSql());
+        $stmt->execute();
+
+        while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
+            yield Rooms::arrayToEntity($row, new Rooms());
+        }
+    }
+    
+    
+    /**
+     * Get all rooms use generator
+     */
+    public function fetchAllAdmin()
+    {
+        $stmt = $this->connection->pdo
+                ->prepare(Finder::getSql("SELECT * FROM app_rooms"));
         $stmt->execute();
 
         while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
@@ -66,7 +97,7 @@ class RoomsService {
      */
     public function save(Rooms $obj)
     {
-        if ($obj->getId() && $this->fetchById($obj->getId())) {
+        if ($obj->getId() && $this->fetchByIdAdmin($obj->getId())) {
             return $this->doUpdate($obj);
         } else {
             return $this->doInsert($obj);
@@ -147,7 +178,7 @@ class RoomsService {
         $sql = 'DELETE FROM ' . $obj::TABLE_NAME . ' WHERE id = :id';
         $stmt = $this->connection->pdo->prepare($sql);
         $stmt->execute(['id' => $obj->getId()]);
-        return ($this->fetchById($obj->getId())) ? FALSE : TRUE;
+        return ($this->fetchByIdAdmin($obj->getId())) ? FALSE : TRUE;
     }
 
 }

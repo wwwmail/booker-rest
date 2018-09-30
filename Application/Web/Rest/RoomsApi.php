@@ -33,17 +33,25 @@ class RoomsApi extends AbstractApi {
         $this->helper = new AppHelper('UsersService', $dbparams);
     }
 
+    /**
+     * Get single room or all rooms
+     * @param Request $request
+     * @param Response $response
+     */
     public function get(Request $request, Response $response)
     {
         $id = $response->getData() ?? 0;
 
         if ($id > 0) {
-            $result = $this->service->
-                    fetchById($id);
+            $result = $this->helper->isAuthAdmin() 
+                    ? $this->service->fetchByIdAdmin($id) 
+                    : $this->service->fetchById($id);
         } else {
 
             $result = [];
-            $fetch = $this->service->fetchAll();
+            $fetch = $this->helper->isAuthAdmin() 
+                    ?  $this->service->fetchAllAdmin()
+                    : $this->service->fetchAll();
 
             foreach ($fetch as $row) {
                 $result[] = $row;
@@ -58,6 +66,11 @@ class RoomsApi extends AbstractApi {
         }
     }
 
+    /**
+     * Update room
+     * @param Request $request
+     * @param Response $response
+     */
     public function put(Request $request, Response $response)
     {
         if ($this->helper->isAuthAdmin()) {
@@ -76,6 +89,11 @@ class RoomsApi extends AbstractApi {
         }
     }
 
+    /**
+     * Create room
+     * @param Request $request
+     * @param Response $response
+     */
     public function post(Request $request, Response $response)
     {
         $id = $request->getDataByKey(self::ID_FIELD) ?? 0;
@@ -103,17 +121,22 @@ class RoomsApi extends AbstractApi {
         }
     }
 
+    /**
+     * Delete room by id
+     * @param Request $request
+     * @param Response $response
+     */
     public function delete(Request $request, Response $response)
     {
-        $id = $request->getDataByKey(self::ID_FIELD) ?? 0;
-
+        $id = $response->getData() ?? 0;
         $check = $this->service->checkEventsExist($id);
-
+        
         if (!$check) {
-            $obj = $this->service->fetchById($id);
-
-            if ($obj && $this->service->remove($obj)) {
-                $response->setData(['success' => self::SUCCESS_DELETE,
+            $obj = $this->service->fetchByIdAdmin($id);
+           
+            $obj->setIsActive(0);
+            if ($obj && $this->service->save($obj)) {
+                $response->setData(['success' => self::_TRUE,
                     'id' => $id]);
                 $response->setStatus(Request::STATUS_200);
             } else {

@@ -16,7 +16,9 @@ class AbstractHttp {
     const TRANSPORT_HTTPS = 'https';
     const STATUS_200 = '200';
     const STATUS_401 = '401';
+    const STATUS_405 = '405';
     const STATUS_500 = '500';
+    
 
     protected $uri; // i.e. http://xxx.com/yyy
     protected $method; // i.e. GET, PUT, POST, DELETE

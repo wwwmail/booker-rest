@@ -8,13 +8,15 @@ class Rooms extends Base {
 
     public $id;
     public $name;
+    public $is_active;
 
     /**
      * @var array mapping from key  to column (values).
      */
     protected $mapping = [
         'id' => 'id',
-        'name' => 'name'
+        'name' => 'name',
+        'is_active' => 'isActive',
     ];
 
     /**
@@ -33,6 +35,24 @@ class Rooms extends Base {
     public function setName($name)
     {
         $this->name = (string) $name;
+    }
+    
+    /**
+     * Set is_active
+     * @param int $param
+     */
+    public function setIsActive($param)
+    {
+        $this->is_active = (int)$param;
+    }
+    
+    /**
+     * Get is active
+     * @return int
+     */
+    public function getIsActive(): int
+    {
+        return $this->is_active;
     }
 
 }

@@ -23,20 +23,48 @@ class UsersService {
     public function fetchById($id)
     {
         $stmt = $this->connection->pdo
-                ->prepare(Finder::select('app_users')
-                ->where('id = :id')::getSql());
+                ->prepare(Finder::getSql('SELECT * FROM app_users WHERE '
+                        . 'id = :id AND is_active = 1'));
         $stmt->execute(['id' => (int) $id]);
         return Users::arrayToEntity(
                         $stmt->fetch(PDO::FETCH_ASSOC), new Users());
     }
 
     /**
+     * Get user by id admin
+     * @param int $id
+     * return object
+     */
+    public function fetchByIdAdmin($id)
+    {
+         $stmt = $this->connection->pdo
+                ->prepare(Finder::getSql("SELECT * FROM app_users WHERE id = :id"));
+        $stmt->execute(['id' => (int) $id]);
+        return Users::arrayToEntity(
+                        $stmt->fetch(PDO::FETCH_ASSOC), new Users());
+    }
+    /**
      * Get all users use generator
      */
     public function fetchAll()
     {
         $stmt = $this->connection->pdo
-                ->prepare(Finder::select('app_users')::getSql());
+                ->prepare(Finder::getSql("SELECT * FROM app_users WHERE is_active = 1"));
+        $stmt->execute();
+
+        while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
+            yield Users::arrayToEntity($row, new Users());
+        }
+    }
+    
+    
+    /**
+     * Get all users for admin use generator
+     */
+    public function fetchAllAdmin()
+    {
+        $stmt = $this->connection->pdo
+                ->prepare(Finder::getSql("SELECT * FROM app_users"));
         $stmt->execute();
 
         while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
@@ -78,6 +106,16 @@ class UsersService {
             return false;
         }
     }
+    
+    public function checkUsersEvent($user_id)
+    {
+         $stmt = $this->connection->pdo
+                ->prepare(Finder::select('app_events')
+                ->where('starttime > :starttime')
+                ->andS('user_id = :user_id')::getSql());
+        $stmt->execute(['starttime' => date('Y-m-d H:i:s'), 'user_id' => (int) $user_id]);
+        return $stmt->fetch(PDO::FETCH_ASSOC);
+    }
 
     /**
      * Get object user by email  
@@ -101,7 +139,7 @@ class UsersService {
      */
     public function save(Users $obj)
     {
-        if ($obj->getId() && $this->fetchById($obj->getId())) {
+        if ($obj->getId() && $this->fetchByIdAdmin($obj->getId())) {
             return $this->doUpdate($obj);
         } else {
             return $this->doInsert($obj);
@@ -183,7 +221,7 @@ class UsersService {
         $sql = 'DELETE FROM ' . $obj::TABLE_NAME . ' WHERE id = :id';
         $stmt = $this->connection->pdo->prepare($sql);
         $stmt->execute(['id' => $obj->getId()]);
-        return ($this->fetchById($obj->getId())) ? FALSE : TRUE;
+        return ($this->fetchByIdAdmin($obj->getId())) ? FALSE : TRUE;
     }
 
     /**
