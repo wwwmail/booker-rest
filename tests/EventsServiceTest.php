@@ -75,18 +75,6 @@ class EventsServiceTest extends TestCase {
         $this->assertTrue(static::$event->save($test));
     }
 
-    public function testReadEventsById()
-    {
-        $id = static::$event->lastInsertId;
-        $this->assertNotEmpty(static::$event->fetchById(1));
-    }
-
-    public function testTypeEventsById()
-    {
-        $id = static::$event->lastInsertId;
-        $this->assertInternalType('object', static::$event->fetchById(1));
-    }
-
     public function testTypeEventsAll()
     {
         $id = static::$event->lastInsertId;

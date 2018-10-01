@@ -128,7 +128,7 @@ class Users extends Base {
      * Get expire
      * @return string 
      */
-    public function getExpire(): string
+    public function getExpire()
     {
         return $this->expire;
     }
@@ -139,7 +139,10 @@ class Users extends Base {
      */
     public function setExpire($expire)
     {
-        $this->expire = (string) $expire;
+        if($expire)
+        {
+         $this->expire = (string) $expire;
+        }
     }
 
     /**

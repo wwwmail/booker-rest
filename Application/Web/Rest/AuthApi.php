@@ -67,9 +67,10 @@ class AuthApi extends AbstractApi {
         $date = (new \DateTime());
         $expire = $date->modify('-' . STAY_LOGINING_TIME . ' minutes')->format('Y-m-d H:i:s');
 
+       if($user){
         $user->setExpire($expire);
-
-        if ($this->service->save($user)) {
+       }
+        if ($user && $this->service->save($user)) {
             $response->setData(['success' => self::_TRUE,
                 'message' => Text::t('success_logout'),
             ]);
@@ -91,7 +92,7 @@ class AuthApi extends AbstractApi {
 
         $user = $this->service->fetchByEmail($reqData['email']);
 
-        if (password_verify($reqData['password'], $user->getPassword())) {
+        if ($user && password_verify($reqData['password'], $user->getPassword())) {
 
             $token = bin2hex(random_bytes(16));
             $date = (new \DateTime());

@@ -611,10 +611,10 @@ class EventsService {
      */
     public function removeEventRecursion($id)
     {
-        $sql = "DELETE FROM app_events WHERE id = ? OR recursion_id=? AND id >= ?  ";
+        $sql = "DELETE FROM app_events WHERE id >= ? OR  recursion_id=?";// AND id >= ?  ";
 
         $stmt = $this->connection->pdo->prepare($sql);
-        return $stmt->execute([$id, $id, $id]);
+        return $stmt->execute([$id, $id]);
     }
 
     /**
