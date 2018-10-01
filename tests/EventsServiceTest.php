@@ -23,7 +23,7 @@ class EventsServiceTest extends TestCase {
         'date' => '2045-08-08',
         'starttime' => '2045-08-08 12:29:37',
         'endtime' => '2045-08-08 13:29:37',
-        'created' => '0000-00-00 00:00:00',
+        'created' => '',
     ];
     private $testArray2 = ['id' => '',
         'recursion' => '0',
@@ -34,7 +34,7 @@ class EventsServiceTest extends TestCase {
         'date' => '2046-08-08',
         'starttime' => '2046-08-08 12:29:37',
         'endtime' => '2046-08-08 13:29:37',
-        'created' => '0000-00-00 00:00:00',
+        'created' => '',
     ];
 
     public function __construct($name = null, array $data = array(), $dataName = '')
@@ -57,7 +57,7 @@ class EventsServiceTest extends TestCase {
         self::$event = new EventsService(self::$db);
         self::$obj = new Events();
 
-        //var_dump($this->pdo->beginTransaction()); 
+        
         $this->pdo->setAttribute(PDO::ATTR_AUTOCOMMIT, 0);
         $this->pdo->beginTransaction();
     }

@@ -10,9 +10,9 @@ class App {
 
     public function __construct($dbParams)
     {
-        list($a, $class) = explode('/', $_SERVER['REQUEST_URI'], 3);
+      //  list($a, $class) = explode('/', $_SERVER['REQUEST_URI'], 3);
 
-//  list($a, $b, $c ,$d, $class) = explode('/', $_SERVER['REQUEST_URI'], 6);
+       list($a, $b, $c ,$d, $class) = explode('/', $_SERVER['REQUEST_URI'], 6);
 
         $class = ucfirst(parse_url($class, PHP_URL_PATH)) . 'Api';
 

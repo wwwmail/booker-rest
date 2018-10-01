@@ -183,7 +183,7 @@ class Events extends Base {
      * Get created datetime
      * @return string 
      */
-    public function getCreated(): string
+    public function getCreated()
     {
         return $this->created;
     }
@@ -194,7 +194,9 @@ class Events extends Base {
      */
     public function setCreated($time)
     {
-        $this->created = (string) $time;
+        if($time){
+            $this->created = (string) $time;
+        }
     }
 
 }

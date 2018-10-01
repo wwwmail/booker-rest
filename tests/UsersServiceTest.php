@@ -73,12 +73,12 @@ class UsersServiceTest extends TestCase {
 
     public function testCheckEmailExist()
     {
-        $this->assertTrue(static::$user->checkByEmail('12@mail.cz'));
+        $this->assertFalse(static::$user->checkByEmail('12@mail.cz'));
     }
 
     public function testGetTypeByEmailExist()
     {
-        $this->assertInternalType('object', static::$user->fetchByEmail('12@mail.cz'));
+        $this->assertInternalType('object', static::$user->fetchByEmail('qq@mail.cz'));
     }
 
     public function testGetByEmailExist()

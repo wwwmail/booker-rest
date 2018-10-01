@@ -423,6 +423,7 @@ class EventsService {
      */
     public function updateEvent(array $data, $recursion = 0)
     {
+
         $data['starttime'] = date('Y-m-d H:i:s', strtotime($data['date'] . ' ' . $data['newStartTime']));
         $data['endtime'] = date('Y-m-d H:i:s', strtotime($data['date'] . ' ' . $data['newEndTime']));
 
@@ -431,11 +432,8 @@ class EventsService {
                     'id' => ['required' => true, 'numeric' => true],
                     'description' => ['required' => true],
                     'starttime' => ['required' => true, 'date' => date("Y-m-d G:i"), 'hour' => true],
-                    'endtime' => ['required' => true, 'date' => $data['starttime'], 'hour' => true],
-        ));
-        
-        //var_dump($data); die;
-
+                    'endtime' => ['required' => true, 'date' => $data['starttime'], 'hour' => true,'minutes' => $data['starttime']],
+                ));
 
         if ($filter->passed()) {
 
@@ -572,8 +570,8 @@ class EventsService {
             }
         }
 
-        $newStartTime = date('H:i:s', strtotime($newStartTime));
-        $newEndTime = date('H:i:s', strtotime($newEndTime));
+        $newStartTime = date('H:i', strtotime($newStartTime));
+        $newEndTime = date('H:i', strtotime($newEndTime));
 
         if ($success) {
 
